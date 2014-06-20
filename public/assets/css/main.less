@@ -144,24 +144,53 @@ em {
 #board {
   display: none;
   margin-top: 30px;
+  margin-bottom: 30px;
 }
-.row {
+.stone-row {
   display: block;
 }
-.row .col {
-  display: inline-block;
+// stones
+.stone-row {
+  position: relative;
+  top: -340px;
+  .stone-col {
+    opacity: 0;
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    background-color: yellow;
+    border-color: black;
+    border-width: 1px;
+    border-style: solid;
+    &.white-move {
+      background-color: whitesmoke;
+    }
+    &.black-move {
+      background-color: black;
+    }
+    &.occupied {
+      opacity: 1;
+    }
+  }
+}
+
+.board-grid {
   width: 40px;
   height: 40px;
+}
+
+.grid-row {
+  // background-color: red;
+  // border: 1px solid black;
+  height: 40px;
+  // position: relative;
+  // top: -340px;
+}
+.grid-square {
   background-color: yellow;
-  border-color: black;
-  border-width: 1px;
-  border-style: solid;
-}
-
-
-.row .col.white-move {
-  background-color: whitesmoke;
-}
-.row .col.black-move {
-  background-color: black;
+  width: 40px;
+  height: 40px;
+  border: 1px solid black;
+  display: inline-block;
 }

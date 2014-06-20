@@ -81,17 +81,27 @@ var loadGame = function(event) {
       $('#gameTitle').text(refreshedGame.name);
       updateMoveCounterDisplay(refreshedGame.moveCount);
 
-      // Render the board
+      //Render the board grid
+      for (r = 0; r < refreshedGame.size - 1; r++) {
+        $gridRow = $("<div class='grid-row'></div>");
+        $gridRow.appendTo($('#board'));
+        for (c = 0; c < refreshedGame.size - 1; c++) {
+          $gridSquare = $("<div class='grid-square'></div>");
+          $gridSquare.appendTo($gridRow);
+        }
+      }
+
+      // Render the board stones
       for (r = 0; r < refreshedGame.size; r++) {
         var row = {
           rowID: 'r' + r
         };
-        var rowHTML = Mustache.render("<div class='row' id='{{rowID}}'></div>", row);
+        var rowHTML = Mustache.render("<div class='stone-row' id='{{rowID}}'></div>", row);
         var $row = $(rowHTML);
         $row.appendTo($('#board'));
         for (c = 0; c < refreshedGame.size; c++) {
           var col = { colID: 'c' + c};
-          var cellHTML = Mustache.render("<div class='col' id={{colID}}></div>", col);
+          var cellHTML = Mustache.render("<div class='stone-col' id={{colID}}></div>", col);
           var $cell = $(cellHTML);
           $cell.appendTo($row);
 
@@ -99,6 +109,7 @@ var loadGame = function(event) {
           $cell.click({row: r, col: c}, clickCell);
         }
       }
+
 
       // Set callback for new loaded moves
       var movesListRef = gameRef.child('moves');
