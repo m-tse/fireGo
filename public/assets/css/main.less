@@ -145,22 +145,21 @@ em {
   display: none;
   margin-top: 30px;
   margin-bottom: 30px;
+  position: relative;
 
-  &.black-play {
+  &.black-to-play.black-player {
     .stone-col:hover {
       background-color: black;
       opacity: 0.5;
     }
   }
-  &.white-play {
+  &.white-to-play.white-player {
     .stone-col:hover {
-      opacity: 0.7;
+      opacity: 0.8;
       background-color: whitesmoke;
     }
   }
 }
-
-
 
 
 // stones
@@ -204,4 +203,25 @@ em {
   height: 40px;
   border: 1px solid black;
   display: inline-block;
+}
+
+.ruler-top {
+  margin-bottom: 20px;
+  .ruler-marker {
+    display: inline-block;
+    width: 40px;
+  }
+}
+.ruler-vertical {
+  position: absolute;
+  top: 37px;
+  left: 50px;
+
+  .ruler-marker {
+    height: 40px;
+  }
+}
+
+#spectators {
+  display: none;
 }

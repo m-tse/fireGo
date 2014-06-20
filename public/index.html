@@ -13,15 +13,24 @@
 <body>
   <div id='messagesDiv'></div>
 
-  <input type='text' id='gameName' placeholder='Game Name'>
-  <button class="btn btn-default" id="createGame" href="#">Create Game</button>
+  <form class='form-inline' role='form'>
+    <div class='form-group'>
+      <input class='form-control' type='text' id='gameName' placeholder='Game Name'>
+    </div>
+    <button class="btn btn-default" id="createGame" href="#">Create Game</button>
+  </form>
+  <!-- <input type="text" id='myUserName' placeholder='Username' class='form-control'> -->
 
-
+  <div id="spectators">
+    <h4>Game Spectators</h4>
+    <button class="btn btn-default" id="playAsBlack" href="#">Play As Black</button>
+    <button class="btn btn-default" id="playAsWhite" href="#">Play As White</button>
+    <!-- <button class="btn btn-default" id="spectate" href="#">Spectate</button> -->
+    <ul class="spectator-list"></ul>
+  </div>
   <h3 id='gameTitle'></h3>
   <h4 id='moveDisplay'></h4>
-  <div id='board'>
-    <div class='board-grid'></div>
-  </div>
+  <div id='board'></div>
   <script src="assets/js/main.js"></script>
 </body>
 </html>
