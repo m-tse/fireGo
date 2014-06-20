@@ -4,14 +4,20 @@ var fbBaseURL = 'https://blistering-fire-3878.firebaseio.com/';
 var gamesListRef = new Firebase('https://blistering-fire-3878.firebaseio.com/games');
 
 
-function renderStone(row, col, move) {
-  // Render the move on the board
+function targetCellSelector(row, col){
   var rowID = 'r' + row;
   var colID = 'c' + col;
-  var selector = '#' + rowID + ' ' + '#' + colID;
-  var $targetCell = $(selector);
+  return '#' + rowID + ' ' + '#' + colID;
+}
+
+function renderStone(moveObj) {
+  // Render the move on the board
+  // var rowID = 'r' + moveObj.row;
+  // var colID = 'c' + moveObj.col;
+  var $targetCell = $(targetCellSelector(moveObj.row, moveObj.col));
+
   // even move, white
-  if (move % 2 === 0) {
+  if (moveObj.move % 2 === 0) {
     $targetCell.addClass('white-move');
   // odd move, black
   } else{
@@ -20,30 +26,55 @@ function renderStone(row, col, move) {
   $targetCell.addClass('occupied');
 }
 
+function isValidMove(row, col) {
+  var $targetCell = $(targetCellSelector(row, col));
+  return !$targetCell.hasClass('occupied');
+}
+
 var loadGame = function(event) {
   // Refresh the game data upon open
   var gameRef = new Firebase(fbBaseURL + '/games/' + event.data.gameID);
-  gameRef.on('value', function(gameSnapshot) {
+
+
+  // Load up the game
+  gameRef.once('value', function(gameSnapshot) {
     // console.log('game reloaded');
     var refreshedGame = gameSnapshot.val();
-    console.log(refreshedGame);
+    // console.log(refreshedGame);
     // What to do when we click to make a move
     var clickCell = function (clickEvent) {
-      var currentMoveCount = refreshedGame.moveCount;
-      var newMoveCount = currentMoveCount + 1;
-      gameRef.child('moveCount').set(newMoveCount);
-      var gameMoves = new Firebase(fbBaseURL + '/games/' + event.data.gameID + '/moves');
-      gameMoves.push({row:clickEvent.data.row, col:clickEvent.data.col, move:currentMoveCount});
+      var row = clickEvent.data.row;
+      var col = clickEvent.data.col;
+      // Verify that the move is valid.
+      if (isValidMove(row, col)) {
+        console.log('valid move');
+        var moveCountRef = new Firebase(fbBaseURL + '/games/' + event.data.gameID + '/moveCount');
+        moveCountRef.once('value', function(moveCountSnapshot) {
+          var moveCount = moveCountSnapshot.val();
 
-      renderStone(clickEvent.data.row, clickEvent.data.col, currentMoveCount);
+          var currentMoveCount = moveCount;
+          var newMoveCount = currentMoveCount + 1;
+          gameRef.child('moveCount').set(newMoveCount);
+          var gameMoves = new Firebase(fbBaseURL + '/games/' + event.data.gameID + '/moves');
+          gameMoves.push({row:clickEvent.data.row, col:clickEvent.data.col, move:currentMoveCount});
+          moveObj = {
+            row: row,
+            col: col,
+            move: currentMoveCount};
+          renderStone(moveObj);
+
+        });
+      } else {
+        console.log('invalid move');
+      }
+
+
     };
 
-    if (!$('#board').is(":visible")) {
       $('#board').show();
       $('#board').empty();
       $('#gameTitle').show();
       $('#gameTitle').text(refreshedGame.name);
-
 
       // Render the board
       for (r = 0; r < refreshedGame.size; r++) {
@@ -63,20 +94,33 @@ var loadGame = function(event) {
           $cell.click({row: r, col: c}, clickCell);
         }
       }
-    }
+
+      // Set callback for new loaded moves
+      var movesListRef = gameRef.child('moves');
+      movesListRef.on('child_added', function(snapshot){
+        var move = snapshot.val();
+        renderStone(move);
+        console.log(move);
+      });
   });
+
+
 };
+
+function listNameLabel (game) {
+  return Mustache.render("{{name}} | {{size}}x{{size}} | Move {{moveCount}}", game);
+}
 
 // callback to load up a list of all games
 gamesListRef.limit(10).on('child_added', function (snapshot) {
   var gameID = snapshot.name();
   var game = snapshot.val();
+  var gameLabel = listNameLabel(game);
   var gameObj = {
-    name: game.name,
-    size: game.size,
-    move: game.moveCount
+    label: gameLabel,
+    gameID: gameID
   };
-  var mustacheHTML = Mustache.render("<div><a class='gameLink' href='#'>{{name}} | {{size}}x{{size}} | Move {{move}}</a></div>", gameObj);
+  var mustacheHTML = Mustache.render("<div><a id='{{gameID}}' class='gameLink' href='#'>{{label}}</a></div>", gameObj);
   var jqueryEl = $(mustacheHTML);
   jqueryEl.appendTo($('#messagesDiv'));
 
@@ -86,9 +130,16 @@ gamesListRef.limit(10).on('child_added', function (snapshot) {
   $('#messagesDiv')[0].scrollTop = $('#messagesDiv')[0].scrollHeight;
 });
 
-// Create a new game
 
-$('#testButton').click(function () {
+gamesListRef.on('child_changed', function(snapshot) {
+  var game = _.extend(snapshot.val(), {gameID: snapshot.name()});
+  var newLabel = listNameLabel(game);
+  $('#' + snapshot.name()).text(newLabel);
+
+});
+
+// Create a new game
+$('#createGame').click(function () {
   var gameName = $('#gameName').val();
   var dateCreated = new Date();
 
