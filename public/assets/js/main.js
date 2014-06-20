@@ -11,9 +11,6 @@ function targetCellSelector(row, col){
 }
 
 function renderStone(moveObj) {
-  // Render the move on the board
-  // var rowID = 'r' + moveObj.row;
-  // var colID = 'c' + moveObj.col;
   var $targetCell = $(targetCellSelector(moveObj.row, moveObj.col));
 
   // even move, white
@@ -31,11 +28,15 @@ function isValidMove(row, col) {
   return !$targetCell.hasClass('occupied');
 }
 
-function moveDisplayLabel(game) {
+function updateMoveCounterDisplay(moveCount) {
   var color = 'Black';
-  if (game.moveCount % 2 === 0) {color = 'White';}
-  extendedGame = _.extend(game, {color:color});
-  return Mustache.render("Move: {{moveCount}}, {{color}} To Play", extendedGame);
+  if (moveCount % 2 === 0) {color = 'White';}
+  var obj = {
+    moveCount: moveCount,
+    color: color
+  };
+  var displayString = Mustache.render("Move: {{moveCount}}, {{color}} To Play", obj);
+  $('#moveDisplay').text(displayString);
 }
 
 var loadGame = function(event) {
@@ -45,9 +46,8 @@ var loadGame = function(event) {
 
   // Load up the game
   gameRef.once('value', function(gameSnapshot) {
-    // console.log('game reloaded');
+
     var refreshedGame = gameSnapshot.val();
-    // console.log(refreshedGame);
     // What to do when we click to make a move
     var clickCell = function (clickEvent) {
       var row = clickEvent.data.row;
@@ -68,12 +68,10 @@ var loadGame = function(event) {
             col: col,
             move: currentMoveCount};
           renderStone(moveObj);
-
         });
       } else {
         console.log('invalid move');
       }
-
 
     };
 
@@ -81,7 +79,7 @@ var loadGame = function(event) {
       $('#board').empty();
       $('#gameTitle').show();
       $('#gameTitle').text(refreshedGame.name);
-      $('#moveDisplay').text(moveDisplayLabel(refreshedGame));
+      updateMoveCounterDisplay(refreshedGame.moveCount);
 
       // Render the board
       for (r = 0; r < refreshedGame.size; r++) {
@@ -107,11 +105,14 @@ var loadGame = function(event) {
       movesListRef.on('child_added', function(snapshot){
         var move = snapshot.val();
         renderStone(move);
-        console.log(move);
+      });
+
+      // Callback for moveCount changing
+      var moveCountRef = gameRef.child('moveCount');
+      moveCountRef.on('value', function(snapshot) {
+        updateMoveCounterDisplay(snapshot.val());
       });
   });
-
-
 };
 
 function listNameLabel (game) {
@@ -137,7 +138,7 @@ gamesListRef.limit(10).on('child_added', function (snapshot) {
   $('#messagesDiv')[0].scrollTop = $('#messagesDiv')[0].scrollHeight;
 });
 
-
+// Update labels for games in list as they come in.
 gamesListRef.on('child_changed', function(snapshot) {
   var game = _.extend(snapshot.val(), {gameID: snapshot.name()});
   var newLabel = listNameLabel(game);
