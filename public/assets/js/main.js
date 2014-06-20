@@ -31,6 +31,13 @@ function isValidMove(row, col) {
   return !$targetCell.hasClass('occupied');
 }
 
+function moveDisplayLabel(game) {
+  var color = 'Black';
+  if (game.moveCount % 2 === 0) {color = 'White';}
+  extendedGame = _.extend(game, {color:color});
+  return Mustache.render("Move: {{moveCount}}, {{color}} To Play", extendedGame);
+}
+
 var loadGame = function(event) {
   // Refresh the game data upon open
   var gameRef = new Firebase(fbBaseURL + '/games/' + event.data.gameID);
@@ -47,7 +54,6 @@ var loadGame = function(event) {
       var col = clickEvent.data.col;
       // Verify that the move is valid.
       if (isValidMove(row, col)) {
-        console.log('valid move');
         var moveCountRef = new Firebase(fbBaseURL + '/games/' + event.data.gameID + '/moveCount');
         moveCountRef.once('value', function(moveCountSnapshot) {
           var moveCount = moveCountSnapshot.val();
@@ -75,6 +81,7 @@ var loadGame = function(event) {
       $('#board').empty();
       $('#gameTitle').show();
       $('#gameTitle').text(refreshedGame.name);
+      $('#moveDisplay').text(moveDisplayLabel(refreshedGame));
 
       // Render the board
       for (r = 0; r < refreshedGame.size; r++) {
