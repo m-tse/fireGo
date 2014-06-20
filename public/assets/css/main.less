@@ -145,12 +145,27 @@ em {
   display: none;
   margin-top: 30px;
   margin-bottom: 30px;
+
+  &.black-play {
+    .stone-col:hover {
+      background-color: black;
+      opacity: 0.5;
+    }
+  }
+  &.white-play {
+    .stone-col:hover {
+      opacity: 0.7;
+      background-color: whitesmoke;
+    }
+  }
 }
-.stone-row {
-  display: block;
-}
+
+
+
+
 // stones
 .stone-row {
+  display: block;
   position: relative;
   top: -340px;
   .stone-col {
@@ -181,11 +196,7 @@ em {
 }
 
 .grid-row {
-  // background-color: red;
-  // border: 1px solid black;
   height: 40px;
-  // position: relative;
-  // top: -340px;
 }
 .grid-square {
   background-color: yellow;

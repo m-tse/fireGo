@@ -10,14 +10,16 @@ function targetCellSelector(row, col){
   return '#' + rowID + ' ' + '#' + colID;
 }
 
-function renderStone(moveObj) {
+function renderMove(moveObj) {
   var $targetCell = $(targetCellSelector(moveObj.row, moveObj.col));
 
   // even move, white
   if (moveObj.move % 2 === 0) {
     $targetCell.addClass('white-move');
+    setBlackPlay();
   // odd move, black
   } else{
+    setWhitePlay();
     $targetCell.addClass('black-move');
   }
   $targetCell.addClass('occupied');
@@ -38,6 +40,16 @@ function updateMoveCounterDisplay(moveCount) {
   var displayString = Mustache.render("Move: {{moveCount}}, {{color}} To Play", obj);
   $('#moveDisplay').text(displayString);
 }
+
+function setBlackPlay() {
+  $('#board').addClass('black-play');
+  $('#board').removeClass('white-play');
+}
+function setWhitePlay() {
+  $('#board').addClass('white-play');
+  $('#board').removeClass('black-play');
+}
+
 
 var loadGame = function(event) {
   // Refresh the game data upon open
@@ -67,7 +79,7 @@ var loadGame = function(event) {
             row: row,
             col: col,
             move: currentMoveCount};
-          renderStone(moveObj);
+          renderMove(moveObj);
         });
       } else {
         console.log('invalid move');
@@ -77,6 +89,7 @@ var loadGame = function(event) {
 
       $('#board').show();
       $('#board').empty();
+      setBlackPlay();
       $('#gameTitle').show();
       $('#gameTitle').text(refreshedGame.name);
       updateMoveCounterDisplay(refreshedGame.moveCount);
@@ -115,7 +128,7 @@ var loadGame = function(event) {
       var movesListRef = gameRef.child('moves');
       movesListRef.on('child_added', function(snapshot){
         var move = snapshot.val();
-        renderStone(move);
+        renderMove(move);
       });
 
       // Callback for moveCount changing
