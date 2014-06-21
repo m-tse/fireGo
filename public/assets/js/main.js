@@ -245,11 +245,15 @@ function loadGame(event) {
       });
       function playAsBlack () {
         blackPlayerRef.set({name: myName, id: mySpectatorID});
+        $('#playAsBlack').addClass('btn-primary');
+        $('#playAsWhite').addClass('disabled');
         $('#board').addClass('black-player');
         blackPlayerRef.onDisconnect().remove();
       }
       function playAsWhite () {
         whitePlayerRef.set({name: myName, id: mySpectatorID});
+        $('#playAsWhite').addClass('btn-primary');
+        $('#playAsBlack').addClass('disabled');
         $('#board').addClass('white-player');
         whitePlayerRef.onDisconnect().remove();
       }
@@ -345,7 +349,7 @@ gamesListRef.limit(10).on('child_added', function (snapshot) {
     label: gameLabel,
     gameID: gameID
   };
-  var mustacheHTML = Mustache.render("<div><a id='{{gameID}}' class='gameLink' href='#'>{{label}}</a></div>", gameObj);
+  var mustacheHTML = Mustache.render("<a class='list-group-item' id='{{gameID}}' class='gameLink' href='#'>{{label}}</a>", gameObj);
   var jqueryEl = $(mustacheHTML);
   jqueryEl.appendTo($('#messagesDiv'));
 
