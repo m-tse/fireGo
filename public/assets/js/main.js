@@ -7,24 +7,137 @@ var gamesListRef = new Firebase('https://blistering-fire-3878.firebaseio.com/gam
 
 function renderMove(moveObj) {
   var $targetCell = $(targetCellSelector(moveObj.row, moveObj.col));
-
+  var currentPlayerColor = '';
   // even move, white
   if (moveObj.move % 2 === 0) {
     $targetCell.addClass('white-move');
+    currentPlayerColor = 'white';
     setBlackPlay();
   // odd move, black
   } else{
     setWhitePlay();
     $targetCell.addClass('black-move');
+    currentPlayerColor = 'black';
   }
   $targetCell.addClass('occupied');
 
-  // Check for killed stones/groups
-  var dx = [1, -1, 0, 0];
-  var dy = [0, 0, 1, -1];
-  // for(i = 0; i < 4; i++){
+  function neighboringCoords(coord) {
+    var boardDim = $('.stone-row').length;
+    var dx = [1, -1, 0, 0];
+    var dy = [0, 0, 1, -1];
+    var adjCoords = [];
+    for(var i = 0; i < 4; i++){
+      var adjStoneX = coord.x + dx[i];
+      var adjStoneY = coord.y + dy[i];
+      if(adjStoneX >= 1 && adjStoneX <= boardDim && adjStoneY >= 1 && adjStoneY <= boardDim) {
+        adjCoords.push({x:adjStoneX, y:adjStoneY});
+      }
+    }
+    return adjCoords;
+  }
 
-  // }
+  function neighboringStones(stoneCoord, colorOption) {
+    var neighboringCoordsList = neighboringCoords(stoneCoord);
+    var adjStones = [];
+    for(var i = 0; i < neighboringCoordsList.length; i++){
+      adjStoneCoord = neighboringCoordsList[i];
+      if(colorOption !== null){
+        if(getColorOfCoord(adjStoneCoord) == colorOption){
+          adjStones.push(adjStoneCoord);
+        }
+      }
+      else {
+        if(getColorOfCoord(adjStoneCoord) != 'empty'){
+          adjStones.push(adjStoneCoord);
+        }
+      }
+    }
+    return adjStones;
+  }
+
+  function oppositeColor(colorString) {
+    if(colorString == 'black') {return 'white';}
+    if(colorString == 'white') {return 'black';}
+    return 'empty';
+  }
+
+  function getColorOfCoord(stoneCoord) {
+    var rowCoord = 'r' + stoneCoord.y;
+    var colCoord = 'c' + stoneCoord.x;
+    var jquerySelector = Mustache.render("#{{rowCoord}} #{{colCoord}}", {rowCoord: rowCoord, colCoord: colCoord});
+    var $stoneDiv = $(jquerySelector);
+    if($stoneDiv.hasClass('black-move')) {return 'black';}
+    if($stoneDiv.hasClass('white-move')) {return 'white';}
+    return 'empty';
+  }
+
+  function coordAlreadyInList(coord, coordList) {
+    for (var i = coordList.length - 1; i >= 0; i--) {
+      if(coord.x == coordList[i].x && coord.y == coordList[i].y){
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Check for killed stones/groups
+  /*
+    1. Check 4 adjacent stones for enemy stones.
+    2. For Each adj enemy stone, peform a recursive BFS to locate all connected enemy stones.
+    3. Among stones of that group, perform BFS for liberties.
+    4. No liberties means death, remove those stones from the board
+  */
+  // 1.
+  var enemyNeighbors = neighboringStones({x:moveObj.col, y:moveObj.row}, oppositeColor(currentPlayerColor));
+  // 2.
+  function getGroupCoords (stoneCoord) {
+
+    function recurse (coord, visitedCoords) {
+      var myColor = getColorOfCoord(coord);
+      var retList = [coord];
+      var neighbors = neighboringStones(coord, myColor);
+      for (var i = neighbors.length - 1; i >= 0; i--) {
+        if(!coordAlreadyInList(neighbors[i], visitedCoords)){
+          var newVisitedCoords = visitedCoords.concat([neighbors[i]]);
+          retList = retList.concat(recurse(neighbors[i], newVisitedCoords));
+        }
+      }
+      return retList;
+    }
+
+    return recurse(stoneCoord, [stoneCoord]);
+  }
+  var enemyGroups = [];
+  for (var i = 0; i < enemyNeighbors.length; i++) {
+    enemyGroups.push(getGroupCoords(enemyNeighbors[i]));
+  }
+
+  // 3.
+  function isDead(stoneGroup){
+    for (var i = stoneGroup.length - 1; i >= 0; i--) {
+      neighborCoords = neighboringCoords(stoneGroup[i]);
+      for (var j = neighborCoords.length - 1; j >= 0; j--) {
+        if(getColorOfCoord(neighborCoords[j]) == 'empty'){
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+  var deadStones = [];
+  for (var j = enemyGroups.length - 1; j >= 0; j--) {
+    var group = enemyGroups[j];
+    if(isDead(group)){
+      deadStones = deadStones.concat(group);
+    }
+  }
+  // 4.
+  for (var k = deadStones.length - 1; k >= 0; k--) {
+    var targetStoneSelector = targetCellSelector(deadStones[k].y, deadStones[k].x);
+    var $targetStone = $(targetStoneSelector);
+    $targetStone.removeClass("white-move black-move occupied");
+  }
+
 }
 
 function targetCellSelector(row, col){
@@ -95,7 +208,6 @@ function loadGame(event) {
             row: row,
             col: col,
             move: currentMoveCount};
-          renderMove(moveObj);
         });
       } else {
         console.log('invalid move');
