@@ -20,6 +20,7 @@ function renderMove(moveObj) {
     currentPlayerColor = 'black';
   }
   $targetCell.addClass('occupied');
+  setValidMovesCSS();
 
   function neighboringCoords(coord) {
     var boardDim = $('.stone-row').length;
@@ -149,7 +150,6 @@ function renderMove(moveObj) {
 
 function addScore(playerColor, value) {
   var $targetDiv;
-
   if(playerColor == 'black'){
     $targetDiv = $('.js-black-stone-count');
   } else {
@@ -165,7 +165,7 @@ function targetCellSelector(row, col){
   var colID = 'c' + col;
   return '#' + rowID + ' ' + '#' + colID;
 }
-function isValidMove(row, col, moveCount) {
+function isValidMove(row, col) {
   if ($('#board').hasClass('black-to-play') && !$('#board').hasClass('black-player')) {return false;}
   if ($('#board').hasClass('white-to-play') && !$('#board').hasClass('white-player')) {return false;}
   var $targetCell = $(targetCellSelector(row, col));
@@ -188,11 +188,29 @@ function setBlackPlay() {
   $('#board').addClass('black-to-play');
   $('#board').removeClass('white-to-play');
 }
+
 function setWhitePlay() {
   $('#board').addClass('white-to-play');
   $('#board').removeClass('black-to-play');
 }
 
+function getRowOfCellDiv() {
+
+}
+function setValidMovesCSS() {
+  $possibleCells = $('.stone-col');
+  for (var i = $possibleCells.length - 1; i >= 0; i--) {
+    var row = parseInt($($possibleCells[i]).parent('.stone-row').attr('id').substring(1));
+    var col = parseInt($($possibleCells[i]).attr('id').substring(1));
+    if(isValidMove(row, col)){
+      $($possibleCells[i]).addClass('valid-move');
+    }
+    else {
+      $($possibleCells[i]).removeClass('valid-move');
+    }
+  }
+
+}
 
 function loadGame(event) {
   // Refresh the game data upon open
@@ -214,7 +232,7 @@ function loadGame(event) {
       var col = clickEvent.data.col;
       var moveCount = clickEvent.data.moveCount;
       // Verify that the move is valid.
-      if (isValidMove(row, col, moveCount)) {
+      if (isValidMove(row, col)) {
         var moveCountRef = new Firebase(fbBaseURL + '/games/' + event.data.gameID + '/moveCount');
         moveCountRef.once('value', function(moveCountSnapshot) {
           var moveCount = moveCountSnapshot.val();
@@ -241,7 +259,6 @@ function loadGame(event) {
       setBlackPlay();
       $('#gameTitle').text(refreshedGame.name);
       updateMoveCounterDisplay(refreshedGame.moveCount);
-
       // Register Spectator Button Events
       $('#playAsBlack').click({}, playAsBlack);
       $('#playAsWhite').click({}, playAsWhite);
@@ -267,6 +284,7 @@ function loadGame(event) {
         $('#playAsBlack').addClass('btn-primary');
         $('#playAsWhite').addClass('disabled');
         $('#board').addClass('black-player');
+        setValidMovesCSS();
         blackPlayerRef.onDisconnect().remove();
       }
       function playAsWhite () {
@@ -274,6 +292,7 @@ function loadGame(event) {
         $('#playAsWhite').addClass('btn-primary');
         $('#playAsBlack').addClass('disabled');
         $('#board').addClass('white-player');
+        setValidMovesCSS();
         whitePlayerRef.onDisconnect().remove();
       }
 
@@ -324,6 +343,7 @@ function loadGame(event) {
         }
       }
 
+      setValidMovesCSS();
 
       // Set callback for new loaded moves
       var movesListRef = gameRef.child('moves');
