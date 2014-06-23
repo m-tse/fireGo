@@ -12,10 +12,12 @@ body {
   text-align: center;
 }
 
-
+#activeGame {
+  display: none;
+}
 
 #board {
-  display: none;
+  // display: none;
   margin-top: 30px;
   margin-bottom: 30px;
   position: relative;
@@ -29,7 +31,7 @@ body {
   &.white-to-play.white-player {
     .stone-col:hover {
       opacity: 0.8;
-      background-color: whitesmoke;
+      background-color: white;
     }
   }
 }
@@ -51,7 +53,7 @@ body {
     border-width: 1px;
     border-style: solid;
     &.white-move {
-      background-color: whitesmoke;
+      background-color: white;
     }
     &.black-move {
       background-color: black;
@@ -88,13 +90,21 @@ body {
 .ruler-vertical {
   position: absolute;
   top: 37px;
-  left: 50px;
+  left: 40px;
 
   .ruler-marker {
     height: 40px;
   }
 }
 
-#spectators {
-  display: none;
+.spectator-name {
+  list-style-type: none;
+}
+
+.captured-stones {
+  font-size: 15px;
+}
+
+.stone-count {
+  display: inline-block;
 }

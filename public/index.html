@@ -11,7 +11,7 @@
   <script src='assets/js/less-1.7.0.js' type="text/javascript"></script>
 </head>
 <body>
-
+<div class='container-fluid'>
   <div class="list-group" id='messagesDiv'></div>
 
   <form class='form-inline' role='form'>
@@ -20,19 +20,31 @@
     </div>
     <button class="btn btn-default" id="createGame" href="#">Create Game</button>
   </form>
-  <!-- <input type="text" id='myUserName' placeholder='Username' class='form-control'> -->
-
-  <div id="spectators">
-    <h4>Game Spectators</h4>
+  <div id="activeGame">
+    <div id="spectators">
+      <h4>Game Spectators</h4>
+      <!-- <button class="btn btn-default" id="spectate" href="#">Spectate</button> -->
+      <ul class="spectator-list"></ul>
+    </div>
+    <h3 id='gameTitle'></h3>
     <button class="btn btn-default" id="playAsBlack" href="#">Play As Black</button>
     <button class="btn btn-default" id="playAsWhite" href="#">Play As White</button>
-    <!-- <button class="btn btn-default" id="spectate" href="#">Spectate</button> -->
-    <ul class="spectator-list"></ul>
+    <h4 id='moveDisplay'></h4>
+    <div class='score-time-count'>
+      <div class='black-score-time-count'>
+        <div class='captured-stones'>
+          Black Captured Stones: <div class='stone-count js-black-stone-count'>0</div>
+        </div>
+      </div>
+      <div class='white-score-time-count'>
+        <div class='captured-stones'>
+          White Captured Stones: <div class='stone-count js-white-stone-count'>0</div>
+        </div>
+      </div>
+    </div>
+    <div id='board'></div>
   </div>
-  <h3 id='gameTitle'></h3>
-  <h4 id='moveDisplay'></h4>
-  <div id='board'></div>
   <script src="assets/js/main.js"></script>
-
+</div>
 </body>
 </html>

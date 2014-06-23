@@ -135,8 +135,28 @@ function renderMove(moveObj) {
   for (var k = deadStones.length - 1; k >= 0; k--) {
     var targetStoneSelector = targetCellSelector(deadStones[k].y, deadStones[k].x);
     var $targetStone = $(targetStoneSelector);
+    // update score count
+    if($targetStone.hasClass('black-move')){
+      addScore('black', 1);
+    }
+    else {
+      addScore('white', 1);
+    }
     $targetStone.removeClass("white-move black-move occupied");
   }
+
+}
+
+function addScore(playerColor, value) {
+  var $targetDiv;
+
+  if(playerColor == 'black'){
+    $targetDiv = $('.js-black-stone-count');
+  } else {
+    $targetDiv = $('.js-white-stone-count');
+  }
+  currentScore = parseInt($targetDiv.text());
+  $targetDiv.text(currentScore + value);
 
 }
 
@@ -214,12 +234,11 @@ function loadGame(event) {
       }
 
     };
+      $('#activeGame').show();
 
-      $('#board').show();
       $('#board').empty();
-      $('#spectators').show();
+      $('#spectators').empty();
       setBlackPlay();
-      $('#gameTitle').show();
       $('#gameTitle').text(refreshedGame.name);
       updateMoveCounterDisplay(refreshedGame.moveCount);
 
