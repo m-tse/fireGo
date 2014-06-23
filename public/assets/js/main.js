@@ -19,7 +19,7 @@ function renderMove(moveObj) {
     $targetCell.addClass('black-move');
     currentPlayerColor = 'black';
   }
-  $targetCell.addClass('occupied');
+  // $targetCell.addClass('occupied');
   setValidMovesCSS();
 
   function neighboringCoords(coord) {
@@ -143,7 +143,7 @@ function renderMove(moveObj) {
     else {
       addScore('white', 1);
     }
-    $targetStone.removeClass("white-move black-move occupied");
+    $targetStone.removeClass("white-move black-move");
   }
 
 }
@@ -169,7 +169,7 @@ function isValidMove(row, col) {
   if ($('#board').hasClass('black-to-play') && !$('#board').hasClass('black-player')) {return false;}
   if ($('#board').hasClass('white-to-play') && !$('#board').hasClass('white-player')) {return false;}
   var $targetCell = $(targetCellSelector(row, col));
-  if ($targetCell.hasClass('occupied')) {return false;}
+  if ($targetCell.hasClass('white-move') || $targetCell.hasClass('black-move')) {return false;}
   return true;
 }
 
@@ -300,8 +300,10 @@ function loadGame(event) {
       // Render board grid numbers
       $topRuler = $("<div class='board-ruler ruler-top'></div>");
       $topRuler.appendTo($('#board'));
-      for (r = 1; r <= refreshedGame.size; r++){
-        var markerHTML = Mustache.render("<div class='ruler-marker'>{{marker}}</div>", {marker: r});
+      for (r = 0; r < refreshedGame.size; r++){
+        var alpha = String.fromCharCode('A'.charCodeAt(0) + r);
+        var num = r + 1;
+        var markerHTML = Mustache.render("<div class='ruler-marker'>{{marker}}</div>", {marker: alpha});
         $marker = $(markerHTML);
         $marker.appendTo($topRuler);
       }
