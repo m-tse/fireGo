@@ -52,8 +52,8 @@ function getColorOfCoord(stoneCoord) {
 }
 
 function coordAlreadyInList(coord, coordList) {
-  for (var i = coordList.length - 1; i >= 0; i--) {
-    if(coord.x == coordList[i].x && coord.y == coordList[i].y){
+  for (var m = coordList.length - 1; m >= 0; m--) {
+    if(coord.x == coordList[m].x && coord.y == coordList[m].y){
       return true;
     }
   }
@@ -61,13 +61,12 @@ function coordAlreadyInList(coord, coordList) {
 }
 
 function recurseGroupCoords (coord, visitedCoords, groupColor) {
-  // var groupColor = getColorOfCoord(coord);
   var retList = [coord];
   var neighbors = neighboringStones(coord, groupColor);
   for (var i = neighbors.length - 1; i >= 0; i--) {
     if(!coordAlreadyInList(neighbors[i], visitedCoords)){
       var newVisitedCoords = visitedCoords.concat([neighbors[i]]);
-      retList = retList.concat(recurseGroupCoords(neighbors[i], newVisitedCoords));
+      retList = retList.concat(recurseGroupCoords(neighbors[i], newVisitedCoords, groupColor));
     }
   }
   return retList;
@@ -116,6 +115,7 @@ function renderMove(moveObj) {
     4. No liberties means death, remove those stones from the board
   */
   // 1.
+  // debugger;
   var enemyNeighbors = neighboringStones({x:moveObj.col, y:moveObj.row}, oppositeColor(currentPlayerColor));
   // 2.
   var enemyGroups = [];
@@ -137,10 +137,10 @@ function renderMove(moveObj) {
     var $targetStone = $(targetStoneSelector);
     // update score count
     if($targetStone.hasClass('black-move')){
-      addScore('black', 1);
+      addScore('white', 1);
     }
     else {
-      addScore('white', 1);
+      addScore('black', 1);
     }
     $targetStone.removeClass("white-move black-move");
   }
