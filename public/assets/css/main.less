@@ -117,3 +117,27 @@ body {
   border: 1px solid black;
   // height: 50px;
 }
+
+.js-edit-black-name, .js-edit-white-name {
+  display: none;
+}
+
+#activeGame{
+  &.black-player {
+    .js-edit-black-name{
+      display: inline-block;
+    }
+  }
+  &.white-player {
+    .js-edit-white-name{
+      display: inline-block;
+    }
+  }
+}
+
+.input-player-name {
+  display: none;
+}
+.submit-edit-black-name, .submit-edit-white-name {
+  display: none;
+}

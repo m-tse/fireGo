@@ -278,6 +278,7 @@ function loadGame(event) {
       var mySpectatorID = mySpectatorEntryRef.name();
       blackPlayerRef.on('value', function(snapshot){
         if (snapshot.val() !== null) {
+          $('.js-black-player-name').text(snapshot.val().name);
           $('#playAsBlack').addClass('disabled');
         } else {
           $('#playAsBlack').removeClass('disabled');
@@ -285,26 +286,31 @@ function loadGame(event) {
       });
       whitePlayerRef.on('value', function(snapshot){
         if (snapshot.val() !== null) {
+          $('.js-white-player-name').text(snapshot.val().name);
           $('#playAsWhite').addClass('disabled');
         } else {
           $('#playAsWhite').removeClass('disabled');
         }
       });
       function playAsBlack () {
-        blackPlayerRef.set({name: myName, id: mySpectatorID});
+        blackPlayerNameInput = $('.js-black-player-name').text();
+        blackPlayerRef.set({name: blackPlayerNameInput, id: mySpectatorID});
         $('#playAsBlack').addClass('btn-primary');
         $('#playAsWhite').addClass('disabled');
         $('#activeGame').addClass('black-player');
         // $('#board').addClass('black-player');
+        $('.js-edit-black-name').click({}, editBlackPlayerName);
         setValidMovesCSS();
         blackPlayerRef.onDisconnect().remove();
       }
       function playAsWhite () {
-        whitePlayerRef.set({name: myName, id: mySpectatorID});
+        whitePlayerNameInput = $('.js-white-player-name').text();
+        whitePlayerRef.set({name: whitePlayerNameInput, id: mySpectatorID});
         $('#playAsWhite').addClass('btn-primary');
         $('#playAsBlack').addClass('disabled');
         $('#activeGame').addClass('white-player');
         // $('#board').addClass('white-player');
+        $('.js-edit-white-name').click({}, editWhitePlayerName);
         setValidMovesCSS();
         whitePlayerRef.onDisconnect().remove();
       }
@@ -316,6 +322,38 @@ function loadGame(event) {
         blackPlayerRef.remove();
         whitePlayerRef.remove();
         $('#gameLobby').show();
+      }
+
+      function editBlackPlayerName () {
+        $('.js-black-player-name, .js-edit-black-name').hide();
+        $('.submit-edit-black-name, .js-black-player-name-input').show();
+        $('.submit-edit-black-name').click({}, submitBlackNameChange);
+      }
+
+      function submitBlackNameChange () {
+        $('.js-black-player-name, .js-edit-black-name').show();
+        $('.submit-edit-black-name, .js-black-player-name-input').hide();
+
+        var $blackPlayerNameLabel = $('.js-black-player-name');
+        $blackPlayerNameLabel.text($('.js-black-player-name-input').val());
+        blackPlayerNameInput = $blackPlayerNameLabel.text();
+        blackPlayerRef.set({name: blackPlayerNameInput, id: mySpectatorID});
+      }
+
+      function editWhitePlayerName () {
+        $('.js-white-player-name, .js-edit-white-name').hide();
+        $('.submit-edit-white-name, .js-white-player-name-input').show();
+        $('.submit-edit-white-name').click({}, submitWhiteNameChange);
+      }
+
+      function submitWhiteNameChange () {
+        $('.js-white-player-name, .js-edit-white-name').show();
+        $('.submit-edit-white-name, .js-white-player-name-input').hide();
+
+        var $whitePlayerNameLabel = $('.js-white-player-name');
+        $whitePlayerNameLabel.text($('.js-white-player-name-input').val());
+        whitePlayerNameInput = $whitePlayerNameLabel.text();
+        whitePlayerRef.set({name: whitePlayerNameInput, id: mySpectatorID});
       }
 
 
