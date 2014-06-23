@@ -169,13 +169,13 @@ function targetCellSelector(row, col){
 
 function isValidMove(row, col) {
   var playerColor;
-  if($('#board').hasClass('black-player')){playerColor = 'black';}
-  else if($('#board').hasClass('white-player')){playerColor = 'white';}
+  if($('#activeGame').hasClass('black-player')){playerColor = 'black';}
+  else if($('#activeGame').hasClass('white-player')){playerColor = 'white';}
   // non-players cannot make valid moves.
   else {return false;}
   // Must be player's turn for valid move
-  if ($('#board').hasClass('black-to-play') && !$('#board').hasClass('black-player')) {return false;}
-  if ($('#board').hasClass('white-to-play') && !$('#board').hasClass('white-player')) {return false;}
+  if ($('#board').hasClass('black-to-play') && !$('#activeGame').hasClass('black-player')) {return false;}
+  if ($('#board').hasClass('white-to-play') && !$('#activeGame').hasClass('white-player')) {return false;}
   // Moves must be on unoccupied intersections
   var $targetCell = $(targetCellSelector(row, col));
   if ($targetCell.hasClass('white-move') || $targetCell.hasClass('black-move')) {return false;}
@@ -295,7 +295,7 @@ function loadGame(event) {
         $('#playAsBlack').addClass('btn-primary');
         $('#playAsWhite').addClass('disabled');
         $('#activeGame').addClass('black-player');
-        $('#board').addClass('black-player');
+        // $('#board').addClass('black-player');
         setValidMovesCSS();
         blackPlayerRef.onDisconnect().remove();
       }
@@ -304,7 +304,7 @@ function loadGame(event) {
         $('#playAsWhite').addClass('btn-primary');
         $('#playAsBlack').addClass('disabled');
         $('#activeGame').addClass('white-player');
-        $('#board').addClass('white-player');
+        // $('#board').addClass('white-player');
         setValidMovesCSS();
         whitePlayerRef.onDisconnect().remove();
       }
@@ -312,7 +312,7 @@ function loadGame(event) {
         // console.log('hello');
         $('#activeGame').hide();
         $('#playAsWhite, #playAsBlack').removeClass('disabled btn-primary');
-        $('#board').removeClass('black-player white-player');
+        $('#activeGame').removeClass('black-player white-player');
         blackPlayerRef.remove();
         whitePlayerRef.remove();
         $('#gameLobby').show();
