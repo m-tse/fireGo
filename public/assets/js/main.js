@@ -310,7 +310,7 @@ function loadGame(event) {
 
       $leftRuler = $("<div class='board-ruler ruler-vertical'></div>");
       $leftRuler.appendTo($('#board'));
-      for (r = 1; r <= refreshedGame.size; r++){
+      for (r = refreshedGame.size; r > 0; r--){
         var markerHTML = Mustache.render("<div class='ruler-marker'>{{marker}}</div>", {marker: r});
         $marker = $(markerHTML);
         $marker.appendTo($leftRuler);
@@ -327,7 +327,7 @@ function loadGame(event) {
       }
 
       // Render the board stones
-      for (r = 1; r <= refreshedGame.size; r++) {
+      for (r = refreshedGame.size; r > 0; r--) {
         var row = {
           rowID: 'r' + r
         };
