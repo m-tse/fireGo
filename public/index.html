@@ -33,19 +33,30 @@
     <button class="btn btn-default" id="playAsBlack" href="#">Play As Black</button>
     <button class="btn btn-default" id="playAsWhite" href="#">Play As White</button>
     <button class='btn btn-default' id='returnToLobby' href='#'>Return To Games Lobby</button>
-    <h4 id='moveDisplay'></h4>
-    <div class='score-time-count'>
-      <div class='black-score-time-count'>
-        <div class='captured-stones'>
-          Black Captured Stones: <div class='stone-count js-black-stone-count'>0</div>
-        </div>
+    <div class='row'>
+      <div class='col-md-6 black-info-box info-box'>Black
+      <div class='player-name'>Name: 
+        <div class='js-black-player-name player-name-text'>Anonymous </div>
+        <button type='button' class='btn btn-default btn-sm'>
+          <span class="black-glyphicon glyphicon glyphicon-pencil"></span></div>
+        </button>
+      <div class='captured-stones'>
+        Captured Stones: <div class='stone-count js-black-stone-count'>0</div>
       </div>
-      <div class='white-score-time-count'>
-        <div class='captured-stones'>
-          White Captured Stones: <div class='stone-count js-white-stone-count'>0</div>
-        </div>
+      </div>
+      <div class='col-md-6 white-info-box info-box'>White
+      <div class='player-name'>Name: 
+        <div class='js-white-player-name player-name-text'>Anonymous </div>
+        <button type='button' class='btn btn-default btn-sm'>
+          <span class="glyphicon white-glyphicon glyphicon-pencil"></span></div>
+        </button>
+      <div class='captured-stones'>
+        Captured Stones: <div class='stone-count js-white-stone-count'>0</div>
+      </div>
       </div>
     </div>
+    <h4 id='moveDisplay'></h4>
+    
     <div id='board'></div>
   </div>
   <script src="assets/js/main.js"></script>

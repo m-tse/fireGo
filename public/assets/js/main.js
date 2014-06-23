@@ -1,9 +1,5 @@
 var fbBaseURL = 'https://blistering-fire-3878.firebaseio.com/';
-
-
 var gamesListRef = new Firebase('https://blistering-fire-3878.firebaseio.com/games');
-
-
 
 function neighboringCoords(coord) {
   var boardDim = $('.stone-row').length;
@@ -170,6 +166,7 @@ function targetCellSelector(row, col){
   var colID = 'c' + col;
   return '#' + rowID + ' ' + '#' + colID;
 }
+
 function isValidMove(row, col) {
   var playerColor;
   if($('#board').hasClass('black-player')){playerColor = 'black';}
@@ -211,9 +208,6 @@ function setWhitePlay() {
   $('#board').removeClass('black-to-play');
 }
 
-function getRowOfCellDiv() {
-
-}
 function setValidMovesCSS() {
   $possibleCells = $('.stone-col');
   for (var i = $possibleCells.length - 1; i >= 0; i--) {
@@ -226,7 +220,6 @@ function setValidMovesCSS() {
       $($possibleCells[i]).removeClass('valid-move');
     }
   }
-
 }
 
 function loadGame(event) {
@@ -301,6 +294,7 @@ function loadGame(event) {
         blackPlayerRef.set({name: myName, id: mySpectatorID});
         $('#playAsBlack').addClass('btn-primary');
         $('#playAsWhite').addClass('disabled');
+        $('#activeGame').addClass('black-player');
         $('#board').addClass('black-player');
         setValidMovesCSS();
         blackPlayerRef.onDisconnect().remove();
@@ -309,6 +303,7 @@ function loadGame(event) {
         whitePlayerRef.set({name: myName, id: mySpectatorID});
         $('#playAsWhite').addClass('btn-primary');
         $('#playAsBlack').addClass('disabled');
+        $('#activeGame').addClass('white-player');
         $('#board').addClass('white-player');
         setValidMovesCSS();
         whitePlayerRef.onDisconnect().remove();
@@ -338,8 +333,8 @@ function loadGame(event) {
       $leftRuler = $("<div class='board-ruler ruler-vertical'></div>");
       $leftRuler.appendTo($('#board'));
       for (r = refreshedGame.size; r > 0; r--){
-        var markerHTML = Mustache.render("<div class='ruler-marker'>{{marker}}</div>", {marker: r});
-        $marker = $(markerHTML);
+        var verticalMarkerHTML = Mustache.render("<div class='ruler-marker'>{{marker}}</div>", {marker: r});
+        $marker = $(verticalMarkerHTML);
         $marker.appendTo($leftRuler);
       }
 
