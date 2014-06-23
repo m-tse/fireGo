@@ -233,7 +233,7 @@ function loadGame(event) {
   // Refresh the game data upon open
   var gameRef = new Firebase(fbBaseURL + '/games/' + event.data.gameID);
 
-
+  $('#gameLobby').hide();
   var myName = "Anonymous User";
   var spectatorsRef = gameRef.child('spectators');
   var mySpectatorEntryRef = spectatorsRef.push({name: myName});
@@ -279,6 +279,7 @@ function loadGame(event) {
       // Register Spectator Button Events
       $('#playAsBlack').click({}, playAsBlack);
       $('#playAsWhite').click({}, playAsWhite);
+      $('#returnToLobby').click({}, returnToGameLobby);
       var blackPlayerRef = gameRef.child('blackPlayer');
       var whitePlayerRef = gameRef.child('whitePlayer');
       var mySpectatorID = mySpectatorEntryRef.name();
@@ -311,6 +312,15 @@ function loadGame(event) {
         $('#board').addClass('white-player');
         setValidMovesCSS();
         whitePlayerRef.onDisconnect().remove();
+      }
+      function returnToGameLobby () {
+        // console.log('hello');
+        $('#activeGame').hide();
+        $('#playAsWhite, #playAsBlack').removeClass('disabled btn-primary');
+        $('#board').removeClass('black-player white-player');
+        blackPlayerRef.remove();
+        whitePlayerRef.remove();
+        $('#gameLobby').show();
       }
 
 

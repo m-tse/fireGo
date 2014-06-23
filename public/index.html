@@ -12,14 +12,17 @@
 </head>
 <body>
 <div class='container-fluid'>
-  <div class="list-group" id='messagesDiv'></div>
 
-  <form class='form-inline' role='form'>
-    <div class='form-group'>
-      <input class='form-control' type='text' id='gameName' placeholder='Game Name'>
-    </div>
-    <button class="btn btn-default" id="createGame" href="#">Create Game</button>
-  </form>
+  <div id='gameLobby'>
+    <div class="list-group" id='messagesDiv'></div>
+    <form class='form-inline' role='form'>
+      <div class='form-group'>
+        <input class='form-control' type='text' id='gameName' placeholder='Game Name'>
+      </div>
+      <button class="btn btn-default" id="createGame" href="#">Create Game</button>
+    </form>
+  </div>
+
   <div id="activeGame">
     <div id="spectators">
       <h4>Game Spectators</h4>
@@ -29,6 +32,7 @@
     <h3 id='gameTitle'></h3>
     <button class="btn btn-default" id="playAsBlack" href="#">Play As Black</button>
     <button class="btn btn-default" id="playAsWhite" href="#">Play As White</button>
+    <button class='btn btn-default' id='returnToLobby' href='#'>Return To Games Lobby</button>
     <h4 id='moveDisplay'></h4>
     <div class='score-time-count'>
       <div class='black-score-time-count'>
