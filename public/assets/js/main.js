@@ -5,6 +5,98 @@ var gamesListRef = new Firebase('https://blistering-fire-3878.firebaseio.com/gam
 
 
 
+function neighboringCoords(coord) {
+  var boardDim = $('.stone-row').length;
+  var dx = [1, -1, 0, 0];
+  var dy = [0, 0, 1, -1];
+  var adjCoords = [];
+  for(var i = 0; i < 4; i++){
+    var adjStoneX = coord.x + dx[i];
+    var adjStoneY = coord.y + dy[i];
+    if(adjStoneX >= 1 && adjStoneX <= boardDim && adjStoneY >= 1 && adjStoneY <= boardDim) {
+      adjCoords.push({x:adjStoneX, y:adjStoneY});
+    }
+  }
+  return adjCoords;
+}
+
+function neighboringStones(stoneCoord, colorOption) {
+  var neighboringCoordsList = neighboringCoords(stoneCoord);
+  var adjStones = [];
+  for(var i = 0; i < neighboringCoordsList.length; i++){
+    adjStoneCoord = neighboringCoordsList[i];
+    if(colorOption !== null){
+      if(getColorOfCoord(adjStoneCoord) == colorOption){
+        adjStones.push(adjStoneCoord);
+      }
+    }
+    else {
+      if(getColorOfCoord(adjStoneCoord) != 'empty'){
+        adjStones.push(adjStoneCoord);
+      }
+    }
+  }
+  return adjStones;
+}
+
+function oppositeColor(colorString) {
+  if(colorString == 'black') {return 'white';}
+  if(colorString == 'white') {return 'black';}
+  return 'empty';
+}
+
+function getColorOfCoord(stoneCoord) {
+  var rowCoord = 'r' + stoneCoord.y;
+  var colCoord = 'c' + stoneCoord.x;
+  var jquerySelector = Mustache.render("#{{rowCoord}} #{{colCoord}}", {rowCoord: rowCoord, colCoord: colCoord});
+  var $stoneDiv = $(jquerySelector);
+  if($stoneDiv.hasClass('black-move')) {return 'black';}
+  if($stoneDiv.hasClass('white-move')) {return 'white';}
+  return 'empty';
+}
+
+function coordAlreadyInList(coord, coordList) {
+  for (var i = coordList.length - 1; i >= 0; i--) {
+    if(coord.x == coordList[i].x && coord.y == coordList[i].y){
+      return true;
+    }
+  }
+  return false;
+}
+
+function recurseGroupCoords (coord, visitedCoords, groupColor) {
+  // var groupColor = getColorOfCoord(coord);
+  var retList = [coord];
+  var neighbors = neighboringStones(coord, groupColor);
+  for (var i = neighbors.length - 1; i >= 0; i--) {
+    if(!coordAlreadyInList(neighbors[i], visitedCoords)){
+      var newVisitedCoords = visitedCoords.concat([neighbors[i]]);
+      retList = retList.concat(recurseGroupCoords(neighbors[i], newVisitedCoords));
+    }
+  }
+  return retList;
+}
+
+function getGroupCoords (stoneCoord) {
+  var stoneColor = getColorOfCoord(stoneCoord);
+  return recurseGroupCoords(stoneCoord, [stoneCoord], stoneColor);
+}
+
+// Gets coordinates of a group of stones if player were to place a stone down at a coordinate
+function getHypotheticalGroupCoords(stoneCoord, stoneColor) {
+  return recurseGroupCoords(stoneCoord, [stoneCoord], stoneColor);
+}
+function isDead(stoneGroup){
+  for (var i = stoneGroup.length - 1; i >= 0; i--) {
+    neighborCoords = neighboringCoords(stoneGroup[i]);
+    for (var j = neighborCoords.length - 1; j >= 0; j--) {
+      if(getColorOfCoord(neighborCoords[j]) == 'empty'){
+        return false;
+      }
+    }
+  }
+  return true;
+}
 function renderMove(moveObj) {
   var $targetCell = $(targetCellSelector(moveObj.row, moveObj.col));
   var currentPlayerColor = '';
@@ -19,67 +111,6 @@ function renderMove(moveObj) {
     $targetCell.addClass('black-move');
     currentPlayerColor = 'black';
   }
-  // $targetCell.addClass('occupied');
-  setValidMovesCSS();
-
-  function neighboringCoords(coord) {
-    var boardDim = $('.stone-row').length;
-    var dx = [1, -1, 0, 0];
-    var dy = [0, 0, 1, -1];
-    var adjCoords = [];
-    for(var i = 0; i < 4; i++){
-      var adjStoneX = coord.x + dx[i];
-      var adjStoneY = coord.y + dy[i];
-      if(adjStoneX >= 1 && adjStoneX <= boardDim && adjStoneY >= 1 && adjStoneY <= boardDim) {
-        adjCoords.push({x:adjStoneX, y:adjStoneY});
-      }
-    }
-    return adjCoords;
-  }
-
-  function neighboringStones(stoneCoord, colorOption) {
-    var neighboringCoordsList = neighboringCoords(stoneCoord);
-    var adjStones = [];
-    for(var i = 0; i < neighboringCoordsList.length; i++){
-      adjStoneCoord = neighboringCoordsList[i];
-      if(colorOption !== null){
-        if(getColorOfCoord(adjStoneCoord) == colorOption){
-          adjStones.push(adjStoneCoord);
-        }
-      }
-      else {
-        if(getColorOfCoord(adjStoneCoord) != 'empty'){
-          adjStones.push(adjStoneCoord);
-        }
-      }
-    }
-    return adjStones;
-  }
-
-  function oppositeColor(colorString) {
-    if(colorString == 'black') {return 'white';}
-    if(colorString == 'white') {return 'black';}
-    return 'empty';
-  }
-
-  function getColorOfCoord(stoneCoord) {
-    var rowCoord = 'r' + stoneCoord.y;
-    var colCoord = 'c' + stoneCoord.x;
-    var jquerySelector = Mustache.render("#{{rowCoord}} #{{colCoord}}", {rowCoord: rowCoord, colCoord: colCoord});
-    var $stoneDiv = $(jquerySelector);
-    if($stoneDiv.hasClass('black-move')) {return 'black';}
-    if($stoneDiv.hasClass('white-move')) {return 'white';}
-    return 'empty';
-  }
-
-  function coordAlreadyInList(coord, coordList) {
-    for (var i = coordList.length - 1; i >= 0; i--) {
-      if(coord.x == coordList[i].x && coord.y == coordList[i].y){
-        return true;
-      }
-    }
-    return false;
-  }
 
   // Check for killed stones/groups
   /*
@@ -91,40 +122,12 @@ function renderMove(moveObj) {
   // 1.
   var enemyNeighbors = neighboringStones({x:moveObj.col, y:moveObj.row}, oppositeColor(currentPlayerColor));
   // 2.
-  function getGroupCoords (stoneCoord) {
-
-    function recurse (coord, visitedCoords) {
-      var myColor = getColorOfCoord(coord);
-      var retList = [coord];
-      var neighbors = neighboringStones(coord, myColor);
-      for (var i = neighbors.length - 1; i >= 0; i--) {
-        if(!coordAlreadyInList(neighbors[i], visitedCoords)){
-          var newVisitedCoords = visitedCoords.concat([neighbors[i]]);
-          retList = retList.concat(recurse(neighbors[i], newVisitedCoords));
-        }
-      }
-      return retList;
-    }
-
-    return recurse(stoneCoord, [stoneCoord]);
-  }
   var enemyGroups = [];
   for (var i = 0; i < enemyNeighbors.length; i++) {
     enemyGroups.push(getGroupCoords(enemyNeighbors[i]));
   }
 
   // 3.
-  function isDead(stoneGroup){
-    for (var i = stoneGroup.length - 1; i >= 0; i--) {
-      neighborCoords = neighboringCoords(stoneGroup[i]);
-      for (var j = neighborCoords.length - 1; j >= 0; j--) {
-        if(getColorOfCoord(neighborCoords[j]) == 'empty'){
-          return false;
-        }
-      }
-    }
-    return true;
-  }
   var deadStones = [];
   for (var j = enemyGroups.length - 1; j >= 0; j--) {
     var group = enemyGroups[j];
@@ -146,6 +149,8 @@ function renderMove(moveObj) {
     $targetStone.removeClass("white-move black-move");
   }
 
+  setValidMovesCSS();
+
 }
 
 function addScore(playerColor, value) {
@@ -166,10 +171,22 @@ function targetCellSelector(row, col){
   return '#' + rowID + ' ' + '#' + colID;
 }
 function isValidMove(row, col) {
+  var playerColor;
+  if($('#board').hasClass('black-player')){playerColor = 'black';}
+  else if($('#board').hasClass('white-player')){playerColor = 'white';}
+  // non-players cannot make valid moves.
+  else {return false;}
+  // Must be player's turn for valid move
   if ($('#board').hasClass('black-to-play') && !$('#board').hasClass('black-player')) {return false;}
   if ($('#board').hasClass('white-to-play') && !$('#board').hasClass('white-player')) {return false;}
+  // Moves must be on unoccupied intersections
   var $targetCell = $(targetCellSelector(row, col));
   if ($targetCell.hasClass('white-move') || $targetCell.hasClass('black-move')) {return false;}
+  // Moves generally cannot be suicidal
+  var hypotheticalGroup = getHypotheticalGroupCoords({x:col, y:row}, playerColor);
+  // console.log(hypotheticalGroup);
+  if(isDead(hypotheticalGroup)) {return false;}
+
   return true;
 }
 
