@@ -92,6 +92,23 @@ function isDead(stoneGroup){
   }
   return true;
 }
+
+function isDeadAfterMakingMove(stoneGroup, move, color){
+  var $targetCell = $(targetCellSelector(move.y, move.x));
+  // temporarily set the move
+  if (color == 'white'){
+    $targetCell.addClass('white-move');
+  }
+  else {
+    $targetCell.addClass('black-move');
+  }
+
+  var boolRetValue = isDead(stoneGroup);
+  // Undo the move
+  $targetCell.removeClass('white-move black-move');
+  return boolRetValue;
+}
+
 function renderMove(moveObj) {
   var $targetCell = $(targetCellSelector(moveObj.row, moveObj.col));
   var currentPlayerColor = '';
@@ -167,6 +184,19 @@ function targetCellSelector(row, col){
   return '#' + rowID + ' ' + '#' + colID;
 }
 
+// Assuming passed in move is suicidal
+function isValidSuicidalMove(row, col, color) {
+  var myMove = {x: col, y: row};
+  var neighbors = neighboringStones(myMove, oppositeColor(color));
+  var neighboringGroups = _.map(neighbors, function(neighbor){ return getGroupCoords(neighbor);});
+  for (var i = neighboringGroups.length - 1; i >= 0; i--) {
+    if(isDeadAfterMakingMove(neighboringGroups[i], myMove, color)){
+      return true;
+    }
+  return false;
+  }
+}
+
 function isValidMove(row, col) {
   var playerColor;
   if($('#activeGame').hasClass('black-player')){playerColor = 'black';}
@@ -179,10 +209,15 @@ function isValidMove(row, col) {
   // Moves must be on unoccupied intersections
   var $targetCell = $(targetCellSelector(row, col));
   if ($targetCell.hasClass('white-move') || $targetCell.hasClass('black-move')) {return false;}
-  // Moves generally cannot be suicidal
   var hypotheticalGroup = getHypotheticalGroupCoords({x:col, y:row}, playerColor);
-  // console.log(hypotheticalGroup);
-  if(isDead(hypotheticalGroup)) {return false;}
+  // Moves generally cannot be suicidal
+  if(isDead(hypotheticalGroup)) {
+    // Moves can be suicidal if they kill off at least one enemy group thus freeing up liberties
+    // if(isValidSuicidalMove(row, col, playerColor)){
+    //   return true;
+    // }
+    return false;
+  }
 
   return true;
 }
@@ -269,6 +304,7 @@ function loadGame(event) {
       setBlackPlay();
       $('#gameTitle').text(refreshedGame.name);
       updateMoveCounterDisplay(refreshedGame.moveCount);
+      $('.js-white-stone-count, .js-black-stone.count').text('0')
       // Register Spectator Button Events
       $('#playAsBlack').click({}, playAsBlack);
       $('#playAsWhite').click({}, playAsWhite);
@@ -462,6 +498,7 @@ gamesListRef.limit(10).on('child_added', function (snapshot) {
 
 // Update labels for games in list as they come in.
 gamesListRef.on('child_changed', function(snapshot) {
+  console.log(snapshot);
   var game = _.extend(snapshot.val(), {gameID: snapshot.name()});
   var newLabel = listNameLabel(game);
   $('#' + snapshot.name()).text(newLabel);
