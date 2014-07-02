@@ -1,16 +1,4 @@
-// var AppView = Backbone.View.extend({
-//   el: $('#goAppBackbone'),
 
-//   initialize: function() {
-//     console.log(this.$el.append("<h1>initialized</h1>"));
-//     // this.gamesLobbyView = new GamesLobbyView;
-//   },
-
-//   render: function() {
-
-//   }
-
-// });
 
 var GamesLobbyView = Backbone.View.extend({
   el: $('#gameLobbyBackbone'),
@@ -21,16 +9,35 @@ var GamesLobbyView = Backbone.View.extend({
 
   render: function() {
     this.$el.empty();
-    for (var i = this.collection.length - 1; i >= 0; i--) {
+    for (var i = 0; i < this.collection.length; i++) {
       var gameModel = this.collection.models[i];
-      var gameLabelHTML = Mustache.render("<a class='list-group-item' class='gameLink' href='#'>{{name}} | {{size}}x{{size}} | Move {{moveCount}}</a>", gameModel.attributes);
-      this.$el.append(gameLabelHTML);
+      var gameLabelView = new GameLabelView({model:gameModel});
+
+      this.$el.append(gameLabelView.render().el);
     }
+    this.$el.append(Templates['public/templates/testTemplate.hbs']);
+    console.log(Templates['public/templates/testTemplate.hbs']);
+    // window.v = JST['templates/post/detail.hbs'];
     return this;
   }
+});
 
+var GameLabelView = Backbone.View.extend({
+  tagName: "a",
+  className: "list-group-item",
+  template: Templates['public/templates/gameLabelTitle.hbs'],
+
+  render: function() {
+    this.$el.html(this.template(this.model.attributes));
+    return this;
+  }
 });
 
 var OpenGameView = Backbone.View.extend({
+  initialize: function() {
 
+  },
+  render: function() {
+
+  }
 });
