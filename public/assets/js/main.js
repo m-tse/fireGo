@@ -513,3 +513,10 @@ $('#createGame').click(function () {
   gamesListRef.push({name: gameName, size:9, moveCount:1});
 });
 
+var GamesModel = new GamesModel();
+var GameLobbyView = new GamesLobbyView({
+  collection: GamesModel
+});
+GameLobbyView.render();
+window.game = GameLobbyView;
+// var App = new AppView();
