@@ -1,10 +1,16 @@
+  <h1>FireGo Backbone</h1>
   <div id='gameLobby'>
-    <h1>gamelobbymustache</h1>
-    <div class="list-group" id='messagesDiv'></div>
+    <div class="js-games-list list-group"></div>
     <form class='form-inline' role='form'>
       <div class='form-group'>
-        <input class='form-control' type='text' id='gameName' placeholder='Game Name'>
+        <input class='form-control js-game-name' type='text' placeholder='Game Name'>
       </div>
-      <button class="btn btn-default" id="createGame" href="#">Create Game</button>
+      <select>
+        <option>19x19</option>
+        <option>13x13</option>
+        <option>9x9</option>
+      </select>
+
+      <button class="btn btn-default js-create-game" href="#">Create Game</button>
     </form>
   </div>
