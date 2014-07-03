@@ -74,24 +74,36 @@ var OpenGameView = Backbone.View.extend({
 
 var BoardView = Backbone.View.extend({
   initialize: function() {
+    window.boardView = this;
     // Create a new firebase collection for moves of this game
     var gameID = this.model.attributes.id;
     var firebaseURL = "https://blistering-fire-3878.firebaseio.com/games/" + gameID + "/moves";
 
     var movesListRef = new Firebase(firebaseURL);
     movesListRef.on('child_added', this.renderMove);
-    window.boardView = this;
+
+    var size = this.model.attributes.size;
+    this.boardIntersections = {};
+    for (var row = size; row > 0; row--) {
+      var rowObj = {};
+      var rowStr = 'r' + row;
+      this.boardIntersections[rowStr] = rowObj;
+      for (var col = size; col > 0; col--) {
+        var colID = 'c' + col;
+        var boardIntersection = new BoardIntersectionView({id:colID});
+        rowObj[colID] = boardIntersection;
+      }
+    }
+
+
   },
   render: function() {
-
-
     this.$el.append(this.renderBoard());
     // this.renderMove();
     return this;
   },
   renderBoard: function() {
     var size = this.model.attributes.size;
-    // Render Grid
     // Render the board grid
     for (r = 0; r < size - 1; r++) {
       $gridRow = $("<div class='grid-row'></div>");
@@ -101,29 +113,29 @@ var BoardView = Backbone.View.extend({
         $gridSquare.appendTo($gridRow);
       }
     }
-    this.boardIntersections = {};
     // Render board
     for (var row = size; row > 0; row--) {
       var rowTemplate = Handlebars.compile("<div class='stone-row' id='r{{row}}'></div>");
       var $row = $(rowTemplate({row: row}));
       this.$el.append($row);
       for (var col = size; col > 0; col--) {
-        // var cellTemplate = Handlebars.compile("<div class='stone-col' id='c{{col}}'></div>");
-        // var $col = $(cellTemplate({col: col}));
-        // $row.append($col);
         var colID = 'c' + col;
-        var boardIntersection = new BoardIntersectionView({id:colID});
-        this.boardIntersections.push(boardIntersection);
+        var boardIntersection = this.getBoardIntersection(row, col);
         $row.append(boardIntersection.render().el);
       }
     }
 
   },
   renderMove: function(snapshot) {
-    console.log(this.boardIntersections);
+    // console.log(this.boardIntersections);
     var moveObj = snapshot.val();
-    console.log(moveObj);
-    console.log('rendering a move');
+    // console.log(moveObj);
+    // console.log('rendering a move');
+  },
+  getBoardIntersection: function(row, col) {
+    var rowID = 'r' + row.toString();
+    var colID = 'c' + col.toString();
+    return this.boardIntersections[rowID][colID];
   }
 });
 

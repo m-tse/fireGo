@@ -21,6 +21,3 @@ var GamesModel = Backbone.Firebase.Collection.extend({
   model: GameModel,
   firebase: "https://blistering-fire-3878.firebaseio.com/games"
 });
-
-// var MovesFirebaseCollection = Backbone.Firebase.Collection.extend({
-// });
