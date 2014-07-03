@@ -75,13 +75,7 @@ var OpenGameView = Backbone.View.extend({
 var BoardView = Backbone.View.extend({
   initialize: function() {
     window.boardView = this;
-    // Create a new firebase collection for moves of this game
-    var gameID = this.model.attributes.id;
-    var firebaseURL = "https://blistering-fire-3878.firebaseio.com/games/" + gameID + "/moves";
-
-    var movesListRef = new Firebase(firebaseURL);
-    movesListRef.on('child_added', this.renderMove);
-
+    // Initialize the board intersections
     var size = this.model.attributes.size;
     this.boardIntersections = {};
     for (var row = size; row > 0; row--) {
@@ -94,7 +88,13 @@ var BoardView = Backbone.View.extend({
         rowObj[colID] = boardIntersection;
       }
     }
+    // Create a new firebase collection for moves of this game
+    var gameID = this.model.attributes.id;
+    var firebaseURL = "https://blistering-fire-3878.firebaseio.com/games/" + gameID + "/moves";
 
+    var movesListRef = new Firebase(firebaseURL);
+    var boundRenderMoves = this.renderMove.bind(this);
+    movesListRef.on('child_added', boundRenderMoves);
 
   },
   render: function() {
@@ -104,6 +104,7 @@ var BoardView = Backbone.View.extend({
   },
   renderBoard: function() {
     var size = this.model.attributes.size;
+
     // Render the board grid
     for (r = 0; r < size - 1; r++) {
       $gridRow = $("<div class='grid-row'></div>");
@@ -120,19 +121,22 @@ var BoardView = Backbone.View.extend({
       this.$el.append($row);
       for (var col = size; col > 0; col--) {
         var colID = 'c' + col;
-        var boardIntersection = this.getBoardIntersection(row, col);
+        var boardIntersection = this.getBoardIntersectionView(row, col);
         $row.append(boardIntersection.render().el);
       }
     }
 
   },
   renderMove: function(snapshot) {
-    // console.log(this.boardIntersections);
     var moveObj = snapshot.val();
-    // console.log(moveObj);
-    // console.log('rendering a move');
+    var boardIntersectionView = this.getBoardIntersectionView(moveObj.row, moveObj.col);
+    function moveColor (moveNumber){
+      if (moveNumber % 2 === 0) {return 'white';} else{return 'black';}
+    }
+    var currMoveColor = moveColor(moveObj.move);
+    boardIntersectionView.displayColor(currMoveColor);
   },
-  getBoardIntersection: function(row, col) {
+  getBoardIntersectionView: function(row, col) {
     var rowID = 'r' + row.toString();
     var colID = 'c' + col.toString();
     return this.boardIntersections[rowID][colID];
@@ -141,16 +145,17 @@ var BoardView = Backbone.View.extend({
 
 var BoardIntersectionView = Backbone.View.extend({
   className: "stone-col",
+
+  intiialize: function() {
+  },
   render: function() {
     return this;
   },
   clearIntersection: function() {
-    $el.removeClass('black-stone white-stone');
+    $el.removeClass('black-move white-move');
   },
-  displayBlack: function() {
-    $el.addClass('black-stone');
-  },
-  displayWhite: function() {
-    $el.addClass('white-stone');
+  displayColor: function(color) {
+    var className = color + '-move';
+    this.$el.addClass(className);
   }
 });
