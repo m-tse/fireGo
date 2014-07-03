@@ -518,5 +518,4 @@ var GameLobbyView = new GamesLobbyView({
   collection: GamesModel
 });
 GameLobbyView.render();
-window.game = GameLobbyView;
 // var App = new AppView();
