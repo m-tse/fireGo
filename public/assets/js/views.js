@@ -1,5 +1,8 @@
 var fbBaseURL = "https://blistering-fire-3878.firebaseio.com/";
 
+function assign(view, selector) { 
+  view.setElement(this.$(selector)).render();
+}
 var GamesLobbyView = Backbone.View.extend({
   el: $('#gameLobbyBackbone'),
   template: Templates['public/templates/gameLobby.hbs'],
@@ -63,17 +66,30 @@ var OpenGameView = Backbone.View.extend({
     this.listenTo(this.model, 'change', this.render);
     var gameRef = new Firebase(fbBaseURL + '/games/' + this.model.attributes.id);
     var myName = "Anonymous User";
-    this.boardView = new BoardView({model: this.model});
-    var somethingRef = gameRef.child('spectators');
-    var something = somethingRef.push({name: myName});
+    var attr = {
+      parent: this
+    };
+    this.boardView = new BoardView({model: this.model, attributes: attr});
+    var spectatorsRef = gameRef.child('spectators');
+    this.mySpectatorEntryRef = spectatorsRef.push({name: myName});
+    this.mySpectatorID = this.mySpectatorEntryRef.name();
+    this.mySpectatorEntryRef.onDisconnect().remove();
+    this.playerColor = 'spectator';
+
   },
   render: function() {
     this.$el.html(this.template(this.model.forTemplate()));
     this.$('.js-board').html(this.boardView.render().el);
+    this.boardView.delegateEvents();
     return this;
   },
+
   returnToLobby: function() {
     $('#gameLobbyBackbone').show();
+    if(this.playerColor == 'black' || this.playerColor == 'white'){
+      this.playerRef.remove();
+    }
+    this.mySpectatorEntryRef.remove();
     this.remove();
   },
   playAsBlack: function() {
@@ -84,17 +100,25 @@ var OpenGameView = Backbone.View.extend({
   },
   // Pass in the string "black" or "white"
   playAsColor: function(color) {
-    console.log('playing as' + color);
+    this.playerColor = color;
+    var nameString = "a Player's Name";
     var gameID = this.model.attributes.id;
-    var playerRef = fbBaseURL + '/games/' + gameID + "/" + color + "Player";
+    this.playerRef = new Firebase(fbBaseURL + '/games/' + gameID + "/" + color + "Player");
+    // Change this to a transaction
+    this.playerRef.set({name: nameString, id: this.mySpectatorID});
+    this.playerRef.onDisconnect().remove();
+    this.boardView.applyPotentialMoveCSS();
+    $('.js-play-as-black,.js-play-as-white').addClass('disabled');
 
-
-  }
+  },
 });
 
 var BoardView = Backbone.View.extend({
+  events: {
+    "click": "makeAMove"
+  },
   initialize: function() {
-    // window.boardView = this;
+    window.boardView = this;
     // Initialize the board intersections
     var size = this.model.attributes.size;
     this.boardIntersections = {};
@@ -104,7 +128,12 @@ var BoardView = Backbone.View.extend({
       this.boardIntersections[rowStr] = rowObj;
       for (var col = size; col > 0; col--) {
         var colID = 'c' + col;
-        var boardIntersection = new BoardIntersectionView({id:colID});
+        var attr = {
+          parent: this,
+          row: row,
+          col: col
+        };
+        var boardIntersection = new BoardIntersectionView({id:colID, attributes:attr});
         rowObj[colID] = boardIntersection;
       }
     }
@@ -120,6 +149,7 @@ var BoardView = Backbone.View.extend({
   },
   render: function() {
     // this.renderMove();
+    this.delegateIntersectionViewEvents();
     return this;
   },
   constructBoardEl: function() {
@@ -143,6 +173,7 @@ var BoardView = Backbone.View.extend({
         var colID = 'c' + col;
         var boardIntersection = this.getBoardIntersectionView(row, col);
         $row.append(boardIntersection.render().el);
+        boardIntersection.delegateEvents();
       }
     }
 
@@ -155,18 +186,69 @@ var BoardView = Backbone.View.extend({
     }
     var currMoveColor = moveColor(moveObj.move);
     boardIntersectionView.displayColor(currMoveColor);
+    this.applyPotentialMoveCSS();
   },
   getBoardIntersectionView: function(row, col) {
     var rowID = 'r' + row.toString();
     var colID = 'c' + col.toString();
     return this.boardIntersections[rowID][colID];
+  },
+  boardIntersectionViews: function() {
+    return _.flatten(_.map(_.values(this.boardIntersections), function(obj){return _.values(obj);}));
+  },
+  delegateIntersectionViewEvents: function() {
+    var intersections = this.boardIntersectionViews();
+    for (var i = intersections.length - 1; i >= 0; i--) {
+      intersections[i].delegateEvents();
+    }
+  },
+  makeMove: function(boardIntersectionView) {
+    if(this.isValidMove(boardIntersectionView)) {
+      var gameMovesRef = new Firebase(fbBaseURL + '/games/' + this.model.attributes.id + "/moves/");
+      var row = boardIntersectionView.attributes.row;
+      var col = boardIntersectionView.attributes.col;
+      gameMovesRef.push({
+        row:row,
+        col:col,
+        move:this.model.forTemplate().totalMoves
+      });
+    }
+    else {
+      console.log('invalid move');
+    }
+  },
+  isValidMove: function(intersectionView) {
+    // var intersectionView = this.getBoardIntersectionView(row, col);
+    if(intersectionView.state == 'black' || intersectionView.state == 'white') {
+      return false;
+    }
+    var currentPlayerColor = this.attributes.parent.playerColor;
+    console.log(this.model.forTemplate().currentTurnColor);
+    if(currentPlayerColor != this.model.forTemplate().currentTurnColor){
+      return false;
+    }
+    return true;
+  },
+  applyPotentialMoveCSS: function() {
+    var intersections = this.boardIntersectionViews();
+    for (var i = intersections.length - 1; i >= 0; i--) {
+      console.log('removed');
+      intersections[i].$el.removeClass('black-hover white-hover');
+      if(this.isValidMove(intersections[i])){
+        var className = this.attributes.parent.playerColor + "-hover";
+        intersections[i].$el.addClass(className);
+      }
+    }
   }
 });
 
 var BoardIntersectionView = Backbone.View.extend({
   className: "stone-col",
-
-  intiialize: function() {
+  events: {
+    "click": "makeMove"
+  },
+  initialize: function() {
+    this.state = 'empty';
   },
   render: function() {
     return this;
@@ -176,6 +258,10 @@ var BoardIntersectionView = Backbone.View.extend({
   },
   displayColor: function(color) {
     var className = color + '-move';
+    this.state = color;
     this.$el.addClass(className);
+  },
+  makeMove: function(){
+    this.attributes.parent.makeMove(this);
   }
 });

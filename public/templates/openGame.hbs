@@ -1,7 +1,11 @@
 <h1>Backbone Open Game</h1>
-  <div id="spectators">
+  <div class='spectators'>
     <h4>Game Spectators</h4>
-    <ul class="spectator-list"></ul>
+    <ul class="spectator-list js-spectator-list">
+      {{#spectators}}
+        <li class='spectator-entry'>{{name}}</li>
+      {{/spectators}}
+    </ul>
   </div>
   <h3 id='gameTitle'>{{name}}</h3>
   <button class='btn btn-default js-return-to-lobby' href='#'>Return To Games Lobby</button>

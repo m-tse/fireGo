@@ -2,15 +2,17 @@
 
 var GameModel = Backbone.Model.extend({
   totalMoves: function() {
-    return _.keys(this.moves).length + 1;
+    return _.keys(this.attributes.moves).length + 1;
   },
   currentTurnColor: function() {
-    if (this.totalMoves() % 2 === 0) {return 'black';} else {return 'white';}
+    if (this.totalMoves() % 2 === 0) {return 'white';} else {return 'black';}
   },
   forTemplate: function() {
     var json = this.toJSON();
     json.totalMoves = this.totalMoves();
     json.currentTurnColor = this.currentTurnColor();
+    var flattenedSpectators = _.values(this.attributes.spectators);
+    json.spectators = flattenedSpectators;
     return json;
   }
 });
