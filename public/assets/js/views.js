@@ -1,4 +1,4 @@
-
+var fbBaseURL = "https://blistering-fire-3878.firebaseio.com/";
 
 var GamesLobbyView = Backbone.View.extend({
   el: $('#gameLobbyBackbone'),
@@ -54,27 +54,47 @@ var GameLabelView = Backbone.View.extend({
 
 var OpenGameView = Backbone.View.extend({
   events: {
-    "click .js-return-to-lobby": "returnToLobby"
+    "click .js-return-to-lobby": "returnToLobby",
+    "click .js-play-as-black": "playAsBlack",
+    "click .js-play-as-white": "playAsWhite"
   },
   template: Templates['public/templates/openGame.hbs'],
   initialize: function() {
     this.listenTo(this.model, 'change', this.render);
+    var gameRef = new Firebase(fbBaseURL + '/games/' + this.model.attributes.id);
+    var myName = "Anonymous User";
+    this.boardView = new BoardView({model: this.model});
+    var somethingRef = gameRef.child('spectators');
+    var something = somethingRef.push({name: myName});
   },
   render: function() {
-    this.$el.html(this.template(this.model.attributes));
-    var boardView = new BoardView({model: this.model});
-    this.$('.js-board').html(boardView.render().el);
+    this.$el.html(this.template(this.model.forTemplate()));
+    this.$('.js-board').html(this.boardView.render().el);
     return this;
   },
   returnToLobby: function() {
     $('#gameLobbyBackbone').show();
     this.remove();
+  },
+  playAsBlack: function() {
+    this.playAsColor('black');
+  },
+  playAsWhite: function() {
+    this.playAsColor('white');
+  },
+  // Pass in the string "black" or "white"
+  playAsColor: function(color) {
+    console.log('playing as' + color);
+    var gameID = this.model.attributes.id;
+    var playerRef = fbBaseURL + '/games/' + gameID + "/" + color + "Player";
+
+
   }
 });
 
 var BoardView = Backbone.View.extend({
   initialize: function() {
-    window.boardView = this;
+    // window.boardView = this;
     // Initialize the board intersections
     var size = this.model.attributes.size;
     this.boardIntersections = {};
@@ -90,19 +110,19 @@ var BoardView = Backbone.View.extend({
     }
     // Create a new firebase collection for moves of this game
     var gameID = this.model.attributes.id;
-    var firebaseURL = "https://blistering-fire-3878.firebaseio.com/games/" + gameID + "/moves";
+    var movesRef = fbBaseURL + 'games/' + gameID + '/moves';
 
-    var movesListRef = new Firebase(firebaseURL);
+    var movesListRef = new Firebase(movesRef);
     var boundRenderMoves = this.renderMove.bind(this);
     movesListRef.on('child_added', boundRenderMoves);
+    this.$el.append(this.constructBoardEl());
 
   },
   render: function() {
-    this.$el.append(this.renderBoard());
     // this.renderMove();
     return this;
   },
-  renderBoard: function() {
+  constructBoardEl: function() {
     var size = this.model.attributes.size;
 
     // Render the board grid

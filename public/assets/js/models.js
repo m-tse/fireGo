@@ -1,19 +1,17 @@
 // Includes all Backbone Models
 
 var GameModel = Backbone.Model.extend({
-  initialize: function() {
-    this.moveOccurred();
-    this.on('change:moves', this.moveOccurred);
-  },
-  moveOccurred: function() {
-    this.set('totalMoves', this.totalMoves);
-    this.set('currentTurnColor', this.currentTurnColor);
-  },
   totalMoves: function() {
     return _.keys(this.moves).length + 1;
   },
   currentTurnColor: function() {
     if (this.totalMoves() % 2 === 0) {return 'black';} else {return 'white';}
+  },
+  forTemplate: function() {
+    var json = this.toJSON();
+    json.totalMoves = this.totalMoves();
+    json.currentTurnColor = this.currentTurnColor();
+    return json;
   }
 });
 
