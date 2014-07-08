@@ -1,8 +1,5 @@
 var fbBaseURL = "https://blistering-fire-3878.firebaseio.com/";
 
-function assign(view, selector) { 
-  view.setElement(this.$(selector)).render();
-}
 var GamesLobbyView = Backbone.View.extend({
   el: $('#gameLobbyBackbone'),
   template: Templates['public/templates/gameLobby.hbs'],
@@ -157,7 +154,6 @@ var BoardView = Backbone.View.extend({
 
   },
   render: function() {
-    // this.renderMove();
     this.delegateIntersectionViewEvents();
     this.applyPotentialMoveCSS();
     return this;
@@ -196,6 +192,9 @@ var BoardView = Backbone.View.extend({
     }
     var currMoveColor = moveColor(moveObj.move);
     boardIntersectionView.displayColor(currMoveColor);
+
+    // Check for killed stones/groups
+
     this.applyPotentialMoveCSS();
   },
   getBoardIntersectionView: function(row, col) {
