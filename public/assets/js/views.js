@@ -106,13 +106,12 @@ var OpenGameView = Backbone.View.extend({
   playAsWhite: function() {
     this.playAsColor('white');
   },
-  // Pass in the string "black" or "white"
   playAsColor: function(color) {
     this.playerColor = color;
     var nameString = "a Player's Name";
     var gameID = this.model.attributes.id;
     this.playerRef = new Firebase(fbBaseURL + '/games/' + gameID + "/" + color + "Player");
-    // Change this to a transaction
+    // TODO: Change this to a transaction
     this.playerRef.set({name: nameString, id: this.mySpectatorID});
     this.playerRef.onDisconnect().remove();
     this.boardView.applyPotentialMoveCSS();
@@ -133,17 +132,17 @@ var BoardView = Backbone.View.extend({
     this.boardIntersections = {};
     for (var row = size; row > 0; row--) {
       var rowObj = {};
-      var rowStr = 'r' + row;
-      this.boardIntersections[rowStr] = rowObj;
+      // var rowStr = 'r' + row;
+      this.boardIntersections[row] = rowObj;
       for (var col = size; col > 0; col--) {
-        var colID = 'c' + col;
+        // var colID = 'c' + col;
         var attr = {
           parent: this,
           row: row,
           col: col
         };
-        var boardIntersection = new BoardIntersectionView({id:colID, attributes:attr});
-        rowObj[colID] = boardIntersection;
+        var boardIntersection = new BoardIntersectionView({attributes:attr});
+        rowObj[col] = boardIntersection;
       }
     }
     // Create a new firebase collection for moves of this game
@@ -158,6 +157,7 @@ var BoardView = Backbone.View.extend({
   render: function() {
     this.delegateIntersectionViewEvents();
     this.applyPotentialMoveCSS();
+    this.applyBoardCSS();
     return this;
   },
   constructBoardEl: function() {
@@ -193,8 +193,7 @@ var BoardView = Backbone.View.extend({
     }
     // Render board
     for (var row = size; row > 0; row--) {
-      var rowTemplate = Handlebars.compile("<div class='stone-row' id='r{{row}}'></div>");
-      var $row = $(rowTemplate({row: row}));
+      var $row = $("<div class='stone-row'></div>");
       this.$el.append($row);
       for (var col = 1; col <= size; col++) {
         var colID = 'c' + col;
@@ -203,6 +202,9 @@ var BoardView = Backbone.View.extend({
         boardIntersection.delegateEvents();
       }
     }
+
+  },
+  applyBoardCSS: function() {
 
   },
   renderMove: function(snapshot) {
@@ -228,9 +230,9 @@ var BoardView = Backbone.View.extend({
     this.scores[this.currMoveColor] += newDeadStones.length;
   },
   getBoardIntersectionView: function(row, col) {
-    var rowID = 'r' + row.toString();
-    var colID = 'c' + col.toString();
-    return this.boardIntersections[rowID][colID];
+    // var rowID = 'r' + row.toString();
+    // var colID = 'c' + col.toString();
+    return this.boardIntersections[row][col];
   },
   boardIntersectionViews: function() {
     return _.flatten(_.map(_.values(this.boardIntersections), function(obj){return _.values(obj);}));

@@ -1,4 +1,4 @@
-<h1>Backbone Open Game</h1>
+<h1>Open Game</h1>
   <div class='spectators'>
     <h4>Game Spectators</h4>
     <ul class="spectator-list js-spectator-list">
@@ -11,7 +11,7 @@
   <button class='btn btn-default js-return-to-lobby' href='#'>Return To Games Lobby</button>
   <div class='row'>
     <div class='col-md-6 black-info-box info-box'>Black
-      <button class="btn btn-default js-play-as-black {{#if black}}btn-primary{{/if}} {{#unless spectator}}disabled{{/unless}}" href="#">Play As Black</button>
+      <button class="btn btn-default js-play-as-black {{#if black}}btn-primary{{/if}} {{#if blackPlayer}}disabled{{/if}} {{#unless spectator}}disabled{{/unless}}" href="#">Play As Black</button>
       <div class='player-name'>Name: 
         <div class='js-black-player-name player-name-text'>Anonymous</div>
         <input type="text" class='input-player-name form-control js-black-player-name-input'>
@@ -24,7 +24,7 @@
       </div>
     </div>
     <div class='col-md-6 white-info-box info-box'>White
-      <button class="btn btn-default js-play-as-white {{#if white}}btn-primary{{/if}} {{#unless spectator}}disabled{{/unless}}" href="#">Play As White</button>
+      <button class="btn btn-default js-play-as-white {{#if white}}btn-primary{{/if}} {{#if whitePlayer}}disabled{{/if}} {{#unless spectator}}disabled{{/unless}}" href="#">Play As White</button>
       <div class='player-name'>Name: 
         <div class='js-white-player-name player-name-text'>Anonymous</div>
         <input type="text" class='input-player-name form-control js-white-player-name-input'>
@@ -37,6 +37,6 @@
       </div>
     </div>
   </div>
-  <h4 id='moveDisplay'>Move: {{totalMoves}}, {{currentTurnColor}} To Play</h4>
+  <h4 class='move-display'>Move: {{totalMoves}}, {{currentTurnColor}} To Play</h4>
   
   <div id='board' class='js-board'></div>
