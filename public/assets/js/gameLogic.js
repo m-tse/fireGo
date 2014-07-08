@@ -22,9 +22,18 @@ function getValidMoves(boardObj, playerColor){
 // Input a boardObj{}, and a moveCoord {x:int, y:int, color:string}, 
 // Returns an array of stoneCoords{x:int, y:int} for dead stones on the board
 function deadStones(boardObj, moveCoord) {
+  // console.log(moveCoord.color);
   boardObj[moveCoord.x][moveCoord.y] = moveCoord.color;
   var enemyNeighbors = neighboringStones(boardObj, moveCoord, oppositeColor(moveCoord.color));
-
+  // console.log(enemyNeighbors);
+  var returnList = [];
+  for (var i = enemyNeighbors.length - 1; i >= 0; i--) {
+    var enemyGroup = getGroupCoords(boardObj, enemyNeighbors[i]);
+    if(isDead(boardObj, enemyGroup)){
+      returnList = returnList.concat(enemyGroup);
+    }
+  }
+  return returnList;
 }
 
 function oppositeColor(colorString) {
@@ -74,32 +83,33 @@ function coordAlreadyInList(coord, coordList) {
   return false;
 }
 
-function recurseGroupCoords (coord, visitedCoords, groupColor) {
+function recurseGroupCoords (boardObj, coord, visitedCoords, groupColor) {
   var retList = [coord];
-  var neighbors = neighboringStones(coord, groupColor);
+  var neighbors = neighboringStones(boardObj, coord, groupColor);
   for (var i = neighbors.length - 1; i >= 0; i--) {
     if(!coordAlreadyInList(neighbors[i], visitedCoords)){
       var newVisitedCoords = visitedCoords.concat([neighbors[i]]);
-      retList = retList.concat(recurseGroupCoords(neighbors[i], newVisitedCoords, groupColor));
+      retList = retList.concat(recurseGroupCoords(boardObj, neighbors[i], newVisitedCoords, groupColor));
     }
   }
   return retList;
 }
 
-function getGroupCoords (stoneCoord) {
-  var stoneColor = getColorOfCoord(stoneCoord);
-  return recurseGroupCoords(stoneCoord, [stoneCoord], stoneColor);
+function getGroupCoords (boardObj, stoneCoord) {
+  var stoneColor = getColorOfCoord(boardObj, stoneCoord);
+  return recurseGroupCoords(boardObj, stoneCoord, [stoneCoord], stoneColor);
 }
 
 // Gets coordinates of a group of stones if player were to place a stone down at a coordinate
-function getHypotheticalGroupCoords(stoneCoord, stoneColor) {
-  return recurseGroupCoords(stoneCoord, [stoneCoord], stoneColor);
-}
-function isDead(stoneGroup){
+// function getHypotheticalGroupCoords(stoneCoord, stoneColor) {
+//   return recurseGroupCoords(boardObj stoneCoord, [stoneCoord], stoneColor);
+// }
+function isDead(boardObj, stoneGroup){
   for (var i = stoneGroup.length - 1; i >= 0; i--) {
-    neighborCoords = neighboringCoords(stoneGroup[i]);
+    neighborCoords = neighboringCoords(boardObj, stoneGroup[i]);
     for (var j = neighborCoords.length - 1; j >= 0; j--) {
-      if(getColorOfCoord(neighborCoords[j]) == 'empty'){
+      // Has a life
+      if(getColorOfCoord(boardObj, neighborCoords[j]) == 'empty'){
         return false;
       }
     }

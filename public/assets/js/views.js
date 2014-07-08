@@ -161,6 +161,25 @@ var BoardView = Backbone.View.extend({
   constructBoardEl: function() {
     var size = this.model.attributes.size;
 
+    // Render board grid numbers
+    $topRuler = $("<div class='board-ruler ruler-top'></div>");
+    this.$el.append($topRuler);
+    for (r = 0; r < size; r++){
+      var alpha = String.fromCharCode('A'.charCodeAt(0) + r);
+      var num = r + 1;
+      var markerHTML = Mustache.render("<div class='ruler-marker'>{{marker}}</div>", {marker: num});
+      $marker = $(markerHTML);
+      $marker.appendTo($topRuler);
+    }
+
+    $leftRuler = $("<div class='board-ruler ruler-vertical'></div>");
+    this.$el.append($leftRuler);
+    for (r = size; r > 0; r--){
+      var verticalMarkerHTML = Mustache.render("<div class='ruler-marker'>{{marker}}</div>", {marker: r});
+      $marker = $(verticalMarkerHTML);
+      $marker.appendTo($leftRuler);
+    }
+
     // Render the board grid
     for (r = 0; r < size - 1; r++) {
       $gridRow = $("<div class='grid-row'></div>");
@@ -175,7 +194,7 @@ var BoardView = Backbone.View.extend({
       var rowTemplate = Handlebars.compile("<div class='stone-row' id='r{{row}}'></div>");
       var $row = $(rowTemplate({row: row}));
       this.$el.append($row);
-      for (var col = size; col > 0; col--) {
+      for (var col = 1; col <= size; col++) {
         var colID = 'c' + col;
         var boardIntersection = this.getBoardIntersectionView(row, col);
         $row.append(boardIntersection.render().el);
@@ -192,6 +211,16 @@ var BoardView = Backbone.View.extend({
     }
     this.currMoveColor = moveColor(moveObj.move);
     boardIntersectionView.displayColor(this.currMoveColor);
+    var boardState = this.getBoardObject();
+    var moveCoord = {
+      x: moveObj.col,
+      y: moveObj.row,
+      color: moveObj.color
+    };
+    var newDeadStones = deadStones(boardState, moveCoord);
+    for (var i = newDeadStones.length - 1; i >= 0; i--) {
+      this.getBoardIntersectionView(newDeadStones[i].y, newDeadStones[i].x).clearIntersection();
+    };
     this.applyPotentialMoveCSS();
   },
   getBoardIntersectionView: function(row, col) {
@@ -209,6 +238,7 @@ var BoardView = Backbone.View.extend({
     }
   },
   makeMove: function(boardIntersectionView) {
+    console.log(this);
     if(this.isValidMove(boardIntersectionView)) {
       var gameMovesRef = new Firebase(fbBaseURL + '/games/' + this.model.attributes.id + "/moves/");
       var row = boardIntersectionView.attributes.row;
@@ -216,7 +246,8 @@ var BoardView = Backbone.View.extend({
       gameMovesRef.push({
         row:row,
         col:col,
-        move:this.model.forTemplate().totalMoves
+        move:this.model.forTemplate().totalMoves,
+        color:this.attributes.parent.playerColor
       });
     }
     else {
@@ -281,7 +312,8 @@ var BoardIntersectionView = Backbone.View.extend({
     return this;
   },
   clearIntersection: function() {
-    $el.removeClass('black-move white-move');
+    this.state = 'empty';
+    this.$el.removeClass('black-move white-move');
   },
   displayColor: function(color) {
     var className = color + '-move';
