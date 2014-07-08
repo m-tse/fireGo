@@ -63,6 +63,7 @@ var OpenGameView = Backbone.View.extend({
   },
   template: Templates['public/templates/openGame.hbs'],
   initialize: function() {
+    window.openGame = this;
     this.listenTo(this.model, 'change', this.render);
     var gameRef = new Firebase(fbBaseURL + '/games/' + this.model.attributes.id);
     var myName = "Anonymous User";
@@ -75,6 +76,8 @@ var OpenGameView = Backbone.View.extend({
     this.mySpectatorID = this.mySpectatorEntryRef.name();
     this.mySpectatorEntryRef.onDisconnect().remove();
     this.playerColor = 'spectator';
+    this.blackScore = 0;
+    this.whiteScore = 0;
 
   },
   render: function() {
@@ -82,7 +85,9 @@ var OpenGameView = Backbone.View.extend({
     modelObj = _.extend(modelObj, {
       black: this.playerColor == 'black',
       white: this.playerColor == 'white',
-      spectator: this.playerColor =='spectator'
+      spectator: this.playerColor =='spectator',
+      blackScore: this.boardView.scores.black,
+      whiteScore: this.boardView.scores.white
     });
     this.$el.html(this.template(modelObj));
     this.$('.js-board').html(this.boardView.render().el);
@@ -114,9 +119,7 @@ var OpenGameView = Backbone.View.extend({
     this.playerRef.set({name: nameString, id: this.mySpectatorID});
     this.playerRef.onDisconnect().remove();
     this.boardView.applyPotentialMoveCSS();
-    $('.js-play-as-black,.js-play-as-white').addClass('disabled');
-
-  },
+  }
 });
 
 var BoardView = Backbone.View.extend({
@@ -127,6 +130,10 @@ var BoardView = Backbone.View.extend({
     window.boardView = this;
     // Initialize the board intersections
     var size = this.model.attributes.size;
+    this.scores = {
+      white: 0,
+      black: 0
+    };
     this.boardIntersections = {};
     for (var row = size; row > 0; row--) {
       var rowObj = {};
@@ -220,8 +227,10 @@ var BoardView = Backbone.View.extend({
     var newDeadStones = deadStones(boardState, moveCoord);
     for (var i = newDeadStones.length - 1; i >= 0; i--) {
       this.getBoardIntersectionView(newDeadStones[i].y, newDeadStones[i].x).clearIntersection();
-    };
+    }
     this.applyPotentialMoveCSS();
+    // Update score
+    this.scores[this.currMoveColor] += newDeadStones.length;
   },
   getBoardIntersectionView: function(row, col) {
     var rowID = 'r' + row.toString();

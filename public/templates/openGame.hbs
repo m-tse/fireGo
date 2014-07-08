@@ -11,7 +11,7 @@
   <button class='btn btn-default js-return-to-lobby' href='#'>Return To Games Lobby</button>
   <div class='row'>
     <div class='col-md-6 black-info-box info-box'>Black
-      <button class="btn btn-default js-play-as-black {{#unless spectator}}disabled{{/unless}}" href="#">Play As Black</button>
+      <button class="btn btn-default js-play-as-black {{#if black}}btn-primary{{/if}} {{#unless spectator}}disabled{{/unless}}" href="#">Play As Black</button>
       <div class='player-name'>Name: 
         <div class='js-black-player-name player-name-text'>Anonymous</div>
         <input type="text" class='input-player-name form-control js-black-player-name-input'>
@@ -20,11 +20,11 @@
         </button>
         <button type='button' class='btn btn-default btn-sm submit-edit-black-name'>Submit</button>
       <div class='captured-stones'>
-        Captured Stones: <div class='stone-count js-black-stone-count'>0</div>
+        Captured Stones: <div class='stone-count js-black-stone-count'>{{blackScore}}</div>
       </div>
     </div>
     <div class='col-md-6 white-info-box info-box'>White
-      <button class="btn btn-default js-play-as-white {{#unless spectator}}disabled{{/unless}}" href="#">Play As White</button>
+      <button class="btn btn-default js-play-as-white {{#if white}}btn-primary{{/if}} {{#unless spectator}}disabled{{/unless}}" href="#">Play As White</button>
       <div class='player-name'>Name: 
         <div class='js-white-player-name player-name-text'>Anonymous</div>
         <input type="text" class='input-player-name form-control js-white-player-name-input'>
@@ -33,7 +33,7 @@
         </button>
         <button type='button' class='btn btn-default btn-sm submit-edit-white-name'>Submit</button>
       <div class='captured-stones'>
-        Captured Stones: <div class='stone-count js-white-stone-count'>0</div>
+        Captured Stones: <div class='stone-count js-white-stone-count'>{{whiteScore}}</div>
       </div>
     </div>
   </div>
