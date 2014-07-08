@@ -190,11 +190,8 @@ var BoardView = Backbone.View.extend({
     function moveColor (moveNumber){
       if (moveNumber % 2 === 0) {return 'white';} else{return 'black';}
     }
-    var currMoveColor = moveColor(moveObj.move);
-    boardIntersectionView.displayColor(currMoveColor);
-
-    // Check for killed stones/groups
-
+    this.currMoveColor = moveColor(moveObj.move);
+    boardIntersectionView.displayColor(this.currMoveColor);
     this.applyPotentialMoveCSS();
   },
   getBoardIntersectionView: function(row, col) {
@@ -226,14 +223,12 @@ var BoardView = Backbone.View.extend({
       console.log('invalid move');
     }
   },
+  // Expensive, checks entire board, be careful
   isValidMove: function(intersectionView) {
-    // var intersectionView = this.getBoardIntersectionView(row, col);
     if(intersectionView.state == 'black' || intersectionView.state == 'white') {
       return false;
     }
     var currentPlayerColor = this.attributes.parent.playerColor;
-    // Use Firebase data for most up to date info 
-    var gameMovesRef = new Firebase(fbBaseURL + '/games/' + this.model.attributes.id + "/moves/");
 
     if(currentPlayerColor != this.model.forTemplate().currentTurnColor){
       return false;
@@ -241,14 +236,36 @@ var BoardView = Backbone.View.extend({
     return true;
   },
   applyPotentialMoveCSS: function() {
+    var currentPlayerColor = this.attributes.parent.playerColor;
+
+    var validMoves = getValidMoves(this.getBoardObject(), currentPlayerColor);
     var intersections = this.boardIntersectionViews();
+    var nextMoveColor = oppositeColor(this.currMoveColor);
     for (var i = intersections.length - 1; i >= 0; i--) {
       intersections[i].$el.removeClass('black-hover white-hover');
-      if(this.isValidMove(intersections[i])){
+      var intersectX = intersections[i].attributes.col;
+      var intersectY = intersections[i].attributes.row;
+      if(nextMoveColor == currentPlayerColor && validMoves[intersectX][intersectY]) {
         var className = this.attributes.parent.playerColor + "-hover";
         intersections[i].$el.addClass(className);
       }
     }
+  },
+
+  getBoardObject: function() {
+    var boardSize = this.model.attributes.size;
+    var board = {};
+    for (var row = 1; row <= boardSize; row++) {
+      var aRow = {};
+      board[row] = aRow;
+    }
+    var intersections = this.boardIntersectionViews();
+    for (var i = intersections.length - 1; i >= 0; i--) {
+      var x = intersections[i].attributes.col;
+      var y = intersections[i].attributes.row;
+      board[x][y] = intersections[i].state;
+    }
+    return board;
   }
 });
 

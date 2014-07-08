@@ -1,5 +1,6 @@
 .DS_Store
 **/.DS_Store
 **~
-public/assets/js
+public/assets/js/lib
+public/assets/js/templates.js
 node_modules
