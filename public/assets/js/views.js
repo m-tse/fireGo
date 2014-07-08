@@ -63,7 +63,6 @@ var OpenGameView = Backbone.View.extend({
   },
   template: Templates['public/templates/openGame.hbs'],
   initialize: function() {
-    window.openGame = this;
     this.listenTo(this.model, 'change', this.render);
     var gameRef = new Firebase(fbBaseURL + '/games/' + this.model.attributes.id);
     var myName = "Anonymous User";
@@ -76,8 +75,6 @@ var OpenGameView = Backbone.View.extend({
     this.mySpectatorID = this.mySpectatorEntryRef.name();
     this.mySpectatorEntryRef.onDisconnect().remove();
     this.playerColor = 'spectator';
-    this.blackScore = 0;
-    this.whiteScore = 0;
 
   },
   render: function() {
@@ -127,7 +124,6 @@ var BoardView = Backbone.View.extend({
     "click": "makeAMove"
   },
   initialize: function() {
-    window.boardView = this;
     // Initialize the board intersections
     var size = this.model.attributes.size;
     this.scores = {
@@ -158,7 +154,6 @@ var BoardView = Backbone.View.extend({
     var boundRenderMoves = this.renderMove.bind(this);
     movesListRef.on('child_added', boundRenderMoves);
     this.$el.append(this.constructBoardEl());
-
   },
   render: function() {
     this.delegateIntersectionViewEvents();
@@ -247,7 +242,6 @@ var BoardView = Backbone.View.extend({
     }
   },
   makeMove: function(boardIntersectionView) {
-    console.log(this);
     if(this.isValidMove(boardIntersectionView)) {
       var gameMovesRef = new Firebase(fbBaseURL + '/games/' + this.model.attributes.id + "/moves/");
       var row = boardIntersectionView.attributes.row;
