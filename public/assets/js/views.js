@@ -44,8 +44,11 @@ var GameLabelView = Backbone.View.extend({
   events: {
     "click": "openGame"
   },
+  initialize: function() {
+    this.listenTo(this.model, 'change', this.render);
+  },
   render: function() {
-    this.$el.html(this.template(this.model.attributes));
+    this.$el.html(this.template(this.model.forTemplate()));
     return this;
   },
   openGame: function() {
@@ -78,7 +81,13 @@ var OpenGameView = Backbone.View.extend({
 
   },
   render: function() {
-    this.$el.html(this.template(this.model.forTemplate()));
+    var modelObj = this.model.forTemplate();
+    modelObj = _.extend(modelObj, {
+      black: this.playerColor == 'black',
+      white: this.playerColor == 'white',
+      spectator: this.playerColor =='spectator'
+    });
+    this.$el.html(this.template(modelObj));
     this.$('.js-board').html(this.boardView.render().el);
     this.boardView.delegateEvents();
     return this;
@@ -150,6 +159,7 @@ var BoardView = Backbone.View.extend({
   render: function() {
     // this.renderMove();
     this.delegateIntersectionViewEvents();
+    this.applyPotentialMoveCSS();
     return this;
   },
   constructBoardEl: function() {
@@ -223,7 +233,9 @@ var BoardView = Backbone.View.extend({
       return false;
     }
     var currentPlayerColor = this.attributes.parent.playerColor;
-    console.log(this.model.forTemplate().currentTurnColor);
+    // Use Firebase data for most up to date info 
+    var gameMovesRef = new Firebase(fbBaseURL + '/games/' + this.model.attributes.id + "/moves/");
+
     if(currentPlayerColor != this.model.forTemplate().currentTurnColor){
       return false;
     }
@@ -232,7 +244,6 @@ var BoardView = Backbone.View.extend({
   applyPotentialMoveCSS: function() {
     var intersections = this.boardIntersectionViews();
     for (var i = intersections.length - 1; i >= 0; i--) {
-      console.log('removed');
       intersections[i].$el.removeClass('black-hover white-hover');
       if(this.isValidMove(intersections[i])){
         var className = this.attributes.parent.playerColor + "-hover";
